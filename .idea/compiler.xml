@@ -6,8 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="shortlink.re-all" />
+        <module name="shortlink.re-gateway" />
+        <module name="shortlink.re-admin" />
+        <module name="tessss" />
+        <module name="shortlink.re-project" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="tessss" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>
