@@ -1,6 +1,7 @@
 package org.vakakawaii.shortlink.admin.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,5 +38,10 @@ public class UserController {
     public Result<UserDesenseRespDTO> getUserByUsernameDesensitization(@PathVariable("username")String username){
         return Results.success(BeanUtil.toBean(
                 userService.getUserByUsername(username), UserDesenseRespDTO.class));
+    }
+
+    @GetMapping("/api/shortlink/v1/user/hasusername")
+    public Result<Boolean> hasUserName(@PathParam("username")String username){
+        return Results.success(userService.hasUserName(username));
     }
 }

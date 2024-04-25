@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.vakakawaii.shortlink.admin.common.convention.errorcode.BaseErrorCode;
-import org.vakakawaii.shortlink.admin.common.convention.errorcode.IErrorCode;
 import org.vakakawaii.shortlink.admin.common.convention.exception.ClientException;
 import org.vakakawaii.shortlink.admin.common.enums.UserErrorCodeEnum;
 import org.vakakawaii.shortlink.admin.dao.entity.UserDO;
@@ -38,5 +36,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         BeanUtils.copyProperties(userDO, result);
 
         return result;
+    }
+
+    @Override
+    public Boolean hasUserName(String username) {
+        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
+                .eq(UserDO::getUsername, username);
+
+        UserDO userDO = baseMapper.selectOne(queryWrapper);
+        return userDO != null;
     }
 }
