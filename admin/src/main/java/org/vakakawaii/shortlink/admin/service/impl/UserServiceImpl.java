@@ -3,6 +3,8 @@ package org.vakakawaii.shortlink.admin.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.redisson.api.RBloomFilter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.vakakawaii.shortlink.admin.common.convention.exception.ClientException;
@@ -17,18 +19,20 @@ import org.vakakawaii.shortlink.admin.service.UserService;
  */
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
+    private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
 
     @Override
     public UserRespDTO getUserByUsername(String username) {
         // 返回对象为UserDO
         LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
-                .eq(UserDO::getUsername,username);
-        UserDO userDO  = baseMapper.selectOne(queryWrapper);
+                .eq(UserDO::getUsername, username);
+        UserDO userDO = baseMapper.selectOne(queryWrapper);
 
 //        判断查上来的用户是否为空
-        if(userDO == null){
+        if (userDO == null) {
             throw new ClientException(UserErrorCodeEnum.USER_NULL);
         }
 
@@ -40,10 +44,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Boolean hasUserName(String username) {
-        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
-                .eq(UserDO::getUsername, username);
-
-        UserDO userDO = baseMapper.selectOne(queryWrapper);
-        return userDO != null;
+//        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
+//                .eq(UserDO::getUsername, username);
+//
+//        UserDO userDO = baseMapper.selectOne(queryWrapper);
+//        return userDO != null;
+        return userRegisterCachePenetrationBloomFilter.contains(username);
     }
 }
