@@ -29,6 +29,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                 .eq(UserDO::getUsername,username);
         UserDO userDO  = baseMapper.selectOne(queryWrapper);
 
+//        判断查上来的用户是否为空
         if(userDO == null){
             throw new ClientException(UserErrorCodeEnum.USER_NULL);
         }
