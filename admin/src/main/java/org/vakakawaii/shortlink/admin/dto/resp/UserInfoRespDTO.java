@@ -2,13 +2,11 @@ package org.vakakawaii.shortlink.admin.dto.resp;
 
 import lombok.Data;
 
-import java.sql.Date;
-
 /**
  * 用户返回（参数响应）实体
  */
 @Data
-public class UserRespDTO {
+public class UserInfoRespDTO {
     /**
      * id
      */
