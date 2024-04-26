@@ -8,7 +8,7 @@ import org.vakakawaii.shortlink.admin.common.serialize.PhoneDesensitizationSeria
  * 用户返回（参数响应）实体
  */
 @Data
-public class UserDesenseRespDTO {
+public class UserInfoDesenseRespDTO {
     /**
      * id
      */

@@ -3,13 +3,12 @@ package org.vakakawaii.shortlink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
-import org.vakakawaii.shortlink.admin.dto.resp.UserDesenseRespDTO;
-import org.vakakawaii.shortlink.admin.dto.resp.UserRespDTO;
+import org.vakakawaii.shortlink.admin.dto.req.UserRegisterReqDTO;
+import org.vakakawaii.shortlink.admin.dto.resp.UserInfoDesenseRespDTO;
+import org.vakakawaii.shortlink.admin.dto.resp.UserInfoRespDTO;
 import org.vakakawaii.shortlink.admin.service.UserService;
 
 /**
@@ -25,8 +24,8 @@ public class UserController {
      * @param username 用户名
      * @return 查询用户信息
      */
-    @GetMapping("/api/shortlink/v1/user/{username}")
-    public Result<UserRespDTO> getUserByUsername(@PathVariable("username")String username){
+    @GetMapping("/api/short_link/v1/user/info/{username}")
+    public Result<UserInfoRespDTO> getUserByUsername(@PathVariable("username")String username){
         return Results.success(userService.getUserByUsername(username));
     }
 
@@ -34,14 +33,25 @@ public class UserController {
      * @param username 用户名
      * @return 查询用户信息（脱敏）
      */
-    @GetMapping("/api/shortlink/v1/user/desense/{username}")
-    public Result<UserDesenseRespDTO> getUserByUsernameDesensitization(@PathVariable("username")String username){
+    @GetMapping("/api/short_link/v1/user/info_desense/{username}")
+    public Result<UserInfoDesenseRespDTO> getUserByUsernameDesensitization(@PathVariable("username")String username){
         return Results.success(BeanUtil.toBean(
-                userService.getUserByUsername(username), UserDesenseRespDTO.class));
+                userService.getUserByUsername(username), UserInfoDesenseRespDTO.class));
     }
 
-    @GetMapping("/api/shortlink/v1/user/hasusername")
-    public Result<Boolean> hasUserName(@PathParam("username")String username){
-        return Results.success(userService.hasUserName(username));
+    /**
+     * 查询是否用户名存在
+     * @param username 用户名
+     * @return Result<Boolean>
+     */
+    @GetMapping("/api/short_link/v1/user/is_username_exist")
+    public Result<Boolean> isUserNameExist(@PathParam("username")String username){
+        return Results.success(userService.isUserNameExist(username));
+    }
+
+    @PostMapping("/api/short_link/v1/user/register")
+    public Result<Void> register(@RequestBody UserRegisterReqDTO userRegisterReqDTO){
+        userService.register(userRegisterReqDTO);
+        return Results.success();
     }
 }
