@@ -45,3 +45,4 @@ public class UserController {
         return Results.success(userService.hasUserName(username));
     }
 }
+
