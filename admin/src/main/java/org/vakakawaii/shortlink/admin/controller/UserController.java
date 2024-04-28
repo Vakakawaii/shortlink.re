@@ -49,6 +49,11 @@ public class UserController {
         return Results.success(userService.isUserNameExist(username));
     }
 
+    /**
+     * 用户信息注册
+     * @param userRegisterReqDTO 请求参数
+     * @return NULL 结果
+     */
     @PostMapping("/api/short_link/v1/user/register")
     public Result<Void> register(@RequestBody UserRegisterReqDTO userRegisterReqDTO){
         userService.register(userRegisterReqDTO);

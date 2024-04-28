@@ -55,6 +55,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 //
 //        UserDO userDO = baseMapper.selectOne(queryWrapper);
 //        return userDO != null;
+//      所有的用户名都在注册的时候加入了布隆过滤器的缓存
+//      查询存在时，经过布隆过滤器，没有访问mysql，所以不会打印日志
         return userRegisterCachePenetrationBloomFilter.contains(username);
     }
 
