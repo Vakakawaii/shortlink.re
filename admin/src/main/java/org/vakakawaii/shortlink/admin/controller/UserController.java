@@ -3,12 +3,16 @@ package org.vakakawaii.shortlink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
+import org.vakakawaii.shortlink.admin.dto.req.UserLoginReqDTO;
 import org.vakakawaii.shortlink.admin.dto.req.UserRegisterReqDTO;
+import org.vakakawaii.shortlink.admin.dto.req.UserUpdateReqDTO;
 import org.vakakawaii.shortlink.admin.dto.resp.UserInfoDesenseRespDTO;
 import org.vakakawaii.shortlink.admin.dto.resp.UserInfoRespDTO;
+import org.vakakawaii.shortlink.admin.dto.resp.UserLoginRespDTO;
 import org.vakakawaii.shortlink.admin.service.UserService;
 
 /**
@@ -57,6 +61,55 @@ public class UserController {
     @PostMapping("/api/short_link/v1/user/register")
     public Result<Void> register(@RequestBody UserRegisterReqDTO userRegisterReqDTO){
         userService.register(userRegisterReqDTO);
+        return Results.success();
+    }
+
+    /**
+     * 更新用户参数
+     * @param userUpdateReqDTO 请求参数
+     * @return 结果
+     */
+    @PutMapping("/api/short_link/v1/user/update")
+    public Result<Void> updateUser(@RequestBody UserUpdateReqDTO userUpdateReqDTO){
+        userService.updateUser(userUpdateReqDTO);
+        return Results.success();
+    }
+
+    /**
+     * 登录
+     * @param userLoginReqDTO 请求参数
+     * @return 结果
+     */
+    @PostMapping("/api/short_link/v1/user/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO userLoginReqDTO){
+        UserLoginRespDTO userLoginRespDTO = userService.login(userLoginReqDTO);
+        return Results.success(userLoginRespDTO);
+    }
+
+    /**
+     * 检查是否登录
+     * @param token
+     * @param username
+     * @return 存在返回1，不存在返回0
+     */
+    @GetMapping("/api/short_link/v1/user/login_check")
+    public Result<Boolean> loginCheck(
+            @RequestParam("token") String token,
+            @RequestParam("username") String username){
+        return Results.success(userService.loginCheck(token,username));
+
+    }
+
+    /**
+     * 登出
+     * @param token
+     * @param username
+     */
+    @DeleteMapping("/api/short_link/v1/user/logout")
+    public Result<Void> logout(
+            @RequestParam("token") String token,
+            @RequestParam("username") String username){
+        userService.logout(token,username);
         return Results.success();
     }
 }
