@@ -14,7 +14,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.vakakawaii.shortlink.admin.common.constant.RedisCacheConstant;
 import org.vakakawaii.shortlink.admin.common.convention.exception.ClientException;
 import org.vakakawaii.shortlink.admin.common.enums.UserErrorCodeEnum;
