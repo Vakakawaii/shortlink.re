@@ -8,4 +8,10 @@ import org.vakakawaii.shortlink.admin.dao.entity.GroupDO;
  */
 public interface GroupService extends IService<GroupDO> {
 
+
+    /**
+     * @param name 分组名
+     */
+    void saveGroup(String name);
+
 }
