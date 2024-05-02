@@ -1,12 +1,8 @@
 package org.vakakawaii.shortlink.admin.dao.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.vakakawaii.shortlink.admin.common.database.BaseDO;
-
-import java.util.Date;
 
 /**
  * 用户持久层实体

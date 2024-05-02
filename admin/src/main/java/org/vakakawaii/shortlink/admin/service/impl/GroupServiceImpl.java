@@ -1,5 +1,6 @@
 package org.vakakawaii.shortlink.admin.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,7 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.vakakawaii.shortlink.admin.dao.entity.GroupDO;
 import org.vakakawaii.shortlink.admin.dao.mapper.GroupMapper;
+import org.vakakawaii.shortlink.admin.dto.resp.GroupInfoRespDTO;
 import org.vakakawaii.shortlink.admin.service.GroupService;
+
+import java.util.List;
 
 /**
  * 分组接口实现层
@@ -29,9 +33,20 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
             gid = RandomUtil.randomString(6);
         }while (hasGid(gid));
 
-        GroupDO groupDO = GroupDO.builder().gid(gid).name(name).build();
+        GroupDO groupDO = GroupDO.builder().gid(gid).name(name).sortOrder(0).build();
         baseMapper.insert(groupDO);
 
+    }
+
+    @Override
+    public List<GroupInfoRespDTO> listGroup() {
+        // TODO 获取用户名
+        LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, "1")
+                .orderByDesc(GroupDO::getUpdateTime);
+
+        List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
+        return BeanUtil.copyToList(groupDOList, GroupInfoRespDTO.class);
     }
 
     private boolean hasGid(String gid){
@@ -41,7 +56,6 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getUsername, null);
         GroupDO hasGroupFlag = baseMapper.selectOne(queryWrapper);
         return hasGroupFlag != null;
-
     }
 
 
