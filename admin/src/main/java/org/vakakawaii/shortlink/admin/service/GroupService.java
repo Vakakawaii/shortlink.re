@@ -2,6 +2,7 @@ package org.vakakawaii.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.vakakawaii.shortlink.admin.dao.entity.GroupDO;
+import org.vakakawaii.shortlink.admin.dto.req.GroupUpdateReqDTO;
 import org.vakakawaii.shortlink.admin.dto.resp.GroupInfoRespDTO;
 
 import java.util.List;
@@ -17,5 +18,14 @@ public interface GroupService extends IService<GroupDO> {
      */
     void saveGroup(String name);
 
+    /**
+     * 查询分组
+     * @return 列表
+     */
     List<GroupInfoRespDTO> listGroup();
+
+    /**
+     * 更新参数
+     */
+    void updateGroup(GroupUpdateReqDTO groupUpdateReqDTO);
 }
