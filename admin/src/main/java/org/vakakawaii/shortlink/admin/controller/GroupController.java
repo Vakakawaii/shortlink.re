@@ -1,14 +1,13 @@
 package org.vakakawaii.shortlink.admin.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.web.bind.annotation.*;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
 import org.vakakawaii.shortlink.admin.dto.req.GroupSaveReqDTO;
+import org.vakakawaii.shortlink.admin.dto.req.GroupSortReqDTO;
 import org.vakakawaii.shortlink.admin.dto.req.GroupUpdateReqDTO;
 import org.vakakawaii.shortlink.admin.dto.resp.GroupInfoRespDTO;
-import org.vakakawaii.shortlink.admin.dto.resp.UserInfoRespDTO;
 import org.vakakawaii.shortlink.admin.service.GroupService;
 
 import java.util.List;
@@ -43,6 +42,24 @@ public class GroupController {
     @PutMapping ("/api/short_link/v1/group/update")
     public Result<Void> updateGroup(@RequestBody GroupUpdateReqDTO groupUpdateReqDTO){
         groupService.updateGroup(groupUpdateReqDTO);
+        return Results.success();
+    }
+
+    /**
+     * 删除分组
+     */
+    @DeleteMapping("/api/short_link/v1/group/delete")
+    public Result<Void> deleteGroup(@RequestParam String gid){
+        groupService.deleteGroup(gid);
+        return Results.success();
+    }
+
+    /**
+     * 排序group
+     */
+    @PostMapping("/api/short_link/v1/group/sort")
+    public Result<Void> sortGroup(@RequestBody List<GroupSortReqDTO> groupSortReqDTOS){
+        groupService.sortGroup(groupSortReqDTOS);
         return Results.success();
     }
 
