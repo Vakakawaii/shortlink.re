@@ -1,5 +1,6 @@
 package org.vakakawaii.shortlink.project.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.vakakawaii.shortlink.project.common.database.BaseDO;
@@ -68,6 +69,7 @@ public class LinkDO extends BaseDO {
     /**
      * 描述
      */
+    @TableField("`describe`")
     private String describe;
 
 
