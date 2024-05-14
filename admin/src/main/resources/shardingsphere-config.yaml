@@ -57,7 +57,7 @@ rules:
         type: AES
         props:
           # AES 加密密钥
-          aes-key-value: d6oadClrrb9A3GWo
+          aes-key-value: daidoujitomoyo93
 # 展现逻辑 SQL & 真实 SQL
 props:
   sql-show: true
