@@ -45,7 +45,7 @@ public class UserTransmitFilter implements Filter {
             String userName = httpServletRequest.getHeader("username");
             String token = httpServletRequest.getHeader("token");
 
-            if (StrUtil.isAllNotBlank(userName,token)){
+            if (!StrUtil.isAllNotBlank(userName,token)){
                 // TODO 拦截器拦截不到这里
                 throw new ClientException(UserErrorCodeEnum.USER_TOKEN_FAIL);
             }
