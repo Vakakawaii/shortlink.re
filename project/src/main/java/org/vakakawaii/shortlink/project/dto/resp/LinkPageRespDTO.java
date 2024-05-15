@@ -1,11 +1,17 @@
-package org.vakakawaii.shortlink.project.dto.req;
+package org.vakakawaii.shortlink.project.dto.resp;
 
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-public class LinkCreateReqDTO {
+public class LinkPageRespDTO {
+
+    /**
+     * id
+     */
+    private Long id;
+
     /**
      * 分组标识
      */
@@ -17,15 +23,22 @@ public class LinkCreateReqDTO {
     private String domain;
 
     /**
+     * 短链接
+     */
+    private String shortUri;
+
+    /**
+     * 完整短链接
+     */
+    private String fullShortUrl;
+
+    /**
      * 原始链接
      */
     private String originUrl;
 
 
-    /**
-     * 创建类型 0:接口创建 1:控制台创建
-     */
-    private Integer createdType;
+
 
     /**
      * 有效期类型 0:永久有效 1:自定义

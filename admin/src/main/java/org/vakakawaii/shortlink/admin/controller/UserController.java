@@ -3,7 +3,6 @@ package org.vakakawaii.shortlink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;

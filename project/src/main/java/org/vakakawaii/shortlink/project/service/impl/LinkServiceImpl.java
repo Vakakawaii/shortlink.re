@@ -2,6 +2,7 @@ package org.vakakawaii.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,13 @@ import org.vakakawaii.shortlink.project.common.convention.exception.ServiceExcep
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
+import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
+
+import java.util.List;
 
 
 @Service
@@ -61,6 +66,17 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .fullShortUrl(linkDO.getFullShortUrl())
                 .shortUri(linkDO.getShortUri())
                 .build();
+    }
+
+    @Override
+    public IPage<LinkPageRespDTO> pageLink(LinkPageReqDTO linkPageReqDTO) {
+        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+                .eq(LinkDO::getGid, linkPageReqDTO.getGid())
+                .eq(LinkDO::getEnableStatus,0)
+                .eq(LinkDO::getDelFlag,0)
+                .orderByDesc(LinkDO::getCreateTime);
+        IPage<LinkDO> page = baseMapper.selectPage(linkPageReqDTO,queryWrapper);
+        return page.convert(each -> BeanUtil.toBean(each,LinkPageRespDTO.class));
     }
 
     private String generateSuffix(LinkCreateReqDTO linkCreateReqDTO) {
