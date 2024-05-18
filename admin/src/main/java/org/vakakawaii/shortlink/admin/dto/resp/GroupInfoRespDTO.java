@@ -24,4 +24,9 @@ public class GroupInfoRespDTO {
      * 排序
      */
     private Integer sortOrder;
+
+    /**
+     * 分组下短连接数量
+     */
+    private Integer linkCount;
 }

@@ -2,6 +2,7 @@ package org.vakakawaii.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,12 +17,14 @@ import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -77,6 +80,17 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .orderByDesc(LinkDO::getCreateTime);
         IPage<LinkDO> page = baseMapper.selectPage(linkPageReqDTO,queryWrapper);
         return page.convert(each -> BeanUtil.toBean(each,LinkPageRespDTO.class));
+    }
+
+    @Override
+    public List<LinkCountQueryRespDTO> listCountLinkByGroupID(List<String> gids) {
+        QueryWrapper<LinkDO> queryWrapper = Wrappers.query(new LinkDO())
+                .select("gid as gid,count(*) as count")
+                .in("gid", gids)
+                .eq("enable_status", 0)
+                .groupBy("gid");
+        List<Map<String, Object>> list = baseMapper.selectMaps(queryWrapper);
+        return BeanUtil.copyToList(list,LinkCountQueryRespDTO.class);
     }
 
     private String generateSuffix(LinkCreateReqDTO linkCreateReqDTO) {

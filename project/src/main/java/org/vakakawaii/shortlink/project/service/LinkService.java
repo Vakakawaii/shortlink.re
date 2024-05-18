@@ -5,13 +5,18 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
+
+import java.util.List;
 
 public interface LinkService extends IService<LinkDO> {
     LinkCreateRespDTO createLink(LinkCreateReqDTO linkCreateReqDTO);
 
 
     IPage<LinkPageRespDTO> pageLink(LinkPageReqDTO linkPageReqDTO);
+
+    List<LinkCountQueryRespDTO> listCountLinkByGroupID(List<String> gids);
 }
 
