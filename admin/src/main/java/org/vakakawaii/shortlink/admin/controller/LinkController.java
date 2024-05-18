@@ -2,17 +2,17 @@ package org.vakakawaii.shortlink.admin.controller;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
+import org.vakakawaii.shortlink.admin.common.convention.result.Results;
 import org.vakakawaii.shortlink.admin.remote.LinkRemoteService;
 import org.vakakawaii.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
 
+import java.util.List;
 
 
 @RestController
@@ -33,5 +33,13 @@ public class LinkController {
         return linkRemoteService.pageLink(linkPageReqDTO);
     }
 
+    /**
+     * 查询短连接分组内数量
+     * @return gid + count -> list
+     */
+    @GetMapping("/api/short_link/project/v1/link/count")
+    public Result<List<LinkCountQueryRespDTO>> listCountLinkByGroupID(@RequestParam("gids") List<String> gids){
+        return linkRemoteService.listCountLinkByGroupID(gids);
+    }
 
 }
