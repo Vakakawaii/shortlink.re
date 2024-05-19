@@ -6,18 +6,23 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.base.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.vakakawaii.shortlink.admin.common.biz.user.UserContext;
+import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.dao.entity.GroupDO;
 import org.vakakawaii.shortlink.admin.dao.mapper.GroupMapper;
 import org.vakakawaii.shortlink.admin.dto.req.GroupSortReqDTO;
 import org.vakakawaii.shortlink.admin.dto.req.GroupUpdateReqDTO;
 import org.vakakawaii.shortlink.admin.dto.resp.GroupInfoRespDTO;
+import org.vakakawaii.shortlink.admin.remote.LinkRemoteService;
+import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.admin.service.GroupService;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 分组接口实现层
@@ -26,6 +31,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
+
+    // TODO 后续重构为 Spring cloud Feign 调用
+
+    LinkRemoteService linkRemoteService = new LinkRemoteService() {
+    };
 
     @Override
     public void saveGroup(String name){
@@ -37,7 +47,12 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
             gid = RandomUtil.randomString(6);
         }while (hasGid(gid));
 
-        GroupDO groupDO = GroupDO.builder().gid(gid).name(name).sortOrder(0).build();
+        GroupDO groupDO = GroupDO.builder()
+                .gid(gid)
+                .name(name)
+                .username(UserContext.getUsername())
+                .sortOrder(0)
+                .build();
         baseMapper.insert(groupDO);
 
     }
@@ -47,10 +62,25 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
 
         LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getUsername, UserContext.getUsername())
-                .orderByDesc(GroupDO::getUpdateTime);
-
+                .eq(GroupDO::getDelFlag, 0)
+                .orderByDesc(GroupDO::getSortOrder,GroupDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
-        return BeanUtil.copyToList(groupDOList, GroupInfoRespDTO.class);
+
+        List<GroupInfoRespDTO> groupInfoRespDTOList = BeanUtil
+                .copyToList(groupDOList, GroupInfoRespDTO.class);
+
+//        查询每组连接数，返回列表
+        Result<List<LinkCountQueryRespDTO>> listResult = linkRemoteService
+                .listCountLinkByGroupID(groupDOList.stream().map(GroupDO::getGid).toList());
+
+        groupInfoRespDTOList.forEach(each -> {
+            Optional<LinkCountQueryRespDTO> first = listResult.getData().stream()
+                    .filter(item -> Objects.equal(item.getGid(),each.getGid()))
+                    .findFirst();
+            first.ifPresent(item -> each.setLinkCount(first.get().getCount()));
+        });
+
+        return groupInfoRespDTOList;
     }
 
     @Override
