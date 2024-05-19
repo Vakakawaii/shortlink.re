@@ -99,7 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
                 // 用户名 添加到布隆过滤器里
                 userRegisterCachePenetrationBloomFilter.add(userRegisterReqDTO.getUsername());
-                groupService.saveGroup("默认分组");
+                groupService.saveGroup(userRegisterReqDTO.getUsername(),"默认分组");
                 return;
             }
             // 获取失败，说明其他线程占用锁，默认之后会添加成功，用户名会存在
