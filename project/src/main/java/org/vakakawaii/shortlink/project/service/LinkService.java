@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.LinkUpdateReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
@@ -18,5 +19,7 @@ public interface LinkService extends IService<LinkDO> {
     IPage<LinkPageRespDTO> pageLink(LinkPageReqDTO linkPageReqDTO);
 
     List<LinkCountQueryRespDTO> listCountLinkByGroupID(List<String> gids);
+
+    void updateLink(LinkUpdateReqDTO linkUpdateReqDTO);
 }
 

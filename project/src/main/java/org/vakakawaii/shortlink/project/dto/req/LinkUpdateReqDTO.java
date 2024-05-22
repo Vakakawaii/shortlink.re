@@ -1,4 +1,5 @@
-package org.vakakawaii.shortlink.admin.remote.dto.req;
+package org.vakakawaii.shortlink.project.dto.req;
+
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -6,11 +7,17 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class LinkCreateReqDTO {
+public class LinkUpdateReqDTO {
+
     /**
      * 分组标识
      */
     private String gid;
+
+    /**
+     * 原始分组标识
+     */
+    private String originGid;
 
     /**
      * 域名
@@ -22,11 +29,15 @@ public class LinkCreateReqDTO {
      */
     private String originUrl;
 
+    /**
+     * 短链接
+     */
+    private String shortUri;
 
     /**
-     * 创建类型 0:接口创建 1:控制台创建
+     * 完整短链接
      */
-    private Integer createdType;
+    private String fullShortUrl;
 
     /**
      * 有效期类型 0:永久有效 1:自定义
@@ -44,8 +55,4 @@ public class LinkCreateReqDTO {
      */
     private String describe;
 
-    /**
-     *  图标
-     */
-    private String favicon;
 }

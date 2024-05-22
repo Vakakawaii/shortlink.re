@@ -3,20 +3,25 @@ package org.vakakawaii.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.base.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.vakakawaii.shortlink.project.common.convention.exception.ClientException;
 import org.vakakawaii.shortlink.project.common.convention.exception.ServiceException;
+import org.vakakawaii.shortlink.project.common.enums.VailDateTypeEnum;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.LinkUpdateReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
@@ -69,6 +74,57 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .fullShortUrl(linkDO.getFullShortUrl())
                 .shortUri(linkDO.getShortUri())
                 .build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateLink(LinkUpdateReqDTO linkUpdateReqDTO) {
+        // 因为是用gid分表的，所以要查询gid，不仅是查全局唯一的全链
+        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+                .eq(LinkDO::getGid, linkUpdateReqDTO.getOriginGid())
+                .eq(LinkDO::getFullShortUrl, linkUpdateReqDTO.getFullShortUrl())
+                .eq(LinkDO::getEnableStatus, 0)
+                .eq(LinkDO::getDelFlag, 0);
+        LinkDO hasLinkDO = baseMapper.selectOne(queryWrapper);
+        if (hasLinkDO == null) {throw new ClientException("短连接记录不存在");}
+
+        LinkDO linkDO = LinkDO.builder()
+                // 先不更改，因为涉及缓存
+                .domain(hasLinkDO.getDomain())
+                .shortUri(hasLinkDO.getShortUri())
+                .clickNum(hasLinkDO.getClickNum())
+                // TODO 图标会导致变慢
+                .favicon(hasLinkDO.getFavicon())
+                .createdType(hasLinkDO.getCreatedType())
+                // 可以修改
+                .originUrl(linkUpdateReqDTO.getOriginUrl())
+                .gid(linkUpdateReqDTO.getGid())
+                .describe(linkUpdateReqDTO.getDescribe())
+                .validDate(linkUpdateReqDTO.getValidDate())
+                .validDateType(linkUpdateReqDTO.getValidDateType())
+                .build();
+
+        // gid相同则在一个表内更新
+        if (Objects.equal(linkUpdateReqDTO.getOriginGid(),linkUpdateReqDTO.getGid())) {
+            LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
+                    .eq(LinkDO::getFullShortUrl, linkUpdateReqDTO.getFullShortUrl())
+                    .eq(LinkDO::getGid, linkUpdateReqDTO.getGid())
+                    .eq(LinkDO::getDelFlag, 0)
+                    .eq(LinkDO::getEnableStatus, 0)
+                    .set(Objects.equal(linkUpdateReqDTO.getValidDateType(), VailDateTypeEnum.PERMANENT.getType()),
+                            LinkDO::getValidDate, null);
+            baseMapper.update(linkDO,updateWrapper);
+        } else {
+//            否则先删除，再增加
+            LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
+                    .eq(LinkDO::getFullShortUrl, linkUpdateReqDTO.getFullShortUrl())
+                    .eq(LinkDO::getGid, hasLinkDO.getGid())
+                    .eq(LinkDO::getDelFlag, 0)
+                    .eq(LinkDO::getEnableStatus, 0);
+            baseMapper.delete(updateWrapper);
+            baseMapper.insert(linkDO);
+        }
+
     }
 
     @Override

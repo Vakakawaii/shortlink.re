@@ -8,6 +8,7 @@ import org.vakakawaii.shortlink.project.common.convention.result.Result;
 import org.vakakawaii.shortlink.project.common.convention.result.Results;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.LinkUpdateReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
@@ -25,6 +26,12 @@ public class LinkController {
     public Result<LinkCreateRespDTO> createLink(@RequestBody LinkCreateReqDTO linkCreateReqDTO){
         LinkCreateRespDTO link = linkService.createLink(linkCreateReqDTO);
         return Results.success(link);
+    }
+
+    @PostMapping("/api/short_link/project/v1/link/update")
+    public Result<Void> updateLink(@RequestBody LinkUpdateReqDTO linkUpdateReqDTO){
+        linkService.updateLink(linkUpdateReqDTO);
+        return Results.success();
     }
 
     @GetMapping("/api/short_link/project/v1/link/page")

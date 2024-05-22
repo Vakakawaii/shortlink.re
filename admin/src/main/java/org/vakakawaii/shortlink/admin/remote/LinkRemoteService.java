@@ -9,6 +9,7 @@ import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
 import org.vakakawaii.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.admin.remote.dto.req.LinkUpdateReqDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
@@ -28,6 +29,12 @@ public interface LinkRemoteService {
                         JSON.toJSONString(linkCreateReqDTO));
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {
         });
+    }
+
+    default Result<Void> updateLink(LinkUpdateReqDTO linkUpdateReqDTO){
+        HttpUtil.post("http://127.0.0.1:8010/api/short_link/project/v1/link/update",
+                        JSON.toJSONString(linkUpdateReqDTO));
+        return Results.success();
     }
 
     default Result<IPage<LinkPageRespDTO>> pageLink(LinkPageReqDTO linkPageReqDTO){
