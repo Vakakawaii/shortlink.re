@@ -2,12 +2,14 @@ package org.vakakawaii.shortlink.project.controller;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.vakakawaii.shortlink.project.common.convention.result.Result;
 import org.vakakawaii.shortlink.project.common.convention.result.Results;
-import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkUpdateReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
@@ -20,7 +22,13 @@ import java.util.List;
 @RestController
 public class LinkController {
 
-    public final LinkService linkService;
+    private final LinkService linkService;
+
+    @GetMapping("/{short-uri}")
+    public void restoreUrl(@PathVariable("short-uri") String shortUri,
+                           ServletRequest request, ServletResponse response){
+        linkService.restoreUrl(shortUri, request, response);
+    }
 
     @PostMapping("/api/short_link/project/v1/link/create")
     public Result<LinkCreateRespDTO> createLink(@RequestBody LinkCreateReqDTO linkCreateReqDTO){

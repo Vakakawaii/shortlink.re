@@ -1,6 +1,7 @@
 package org.vakakawaii.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.http.server.HttpServerResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -8,7 +9,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.base.Objects;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
@@ -18,6 +23,8 @@ import org.vakakawaii.shortlink.project.common.convention.exception.ClientExcept
 import org.vakakawaii.shortlink.project.common.convention.exception.ServiceException;
 import org.vakakawaii.shortlink.project.common.enums.VailDateTypeEnum;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
+import org.vakakawaii.shortlink.project.dao.entity.LinkGotoDO;
+import org.vakakawaii.shortlink.project.dao.mapper.LinkGotoMapper;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
@@ -38,7 +45,36 @@ import java.util.Map;
 public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements LinkService {
 
     private final RBloomFilter<String> linkUriCreateCachePenetrationBloomFilter;
+    private final LinkGotoMapper linkGotoMapper;
 
+    @SneakyThrows
+    @Override
+    public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
+        String domain = request.getServerName();
+        String fullShortUrl = domain + "/" + shortUri;
+
+        LambdaQueryWrapper<LinkGotoDO> gotoQueryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
+                .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
+        LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(gotoQueryWrapper);
+        if (linkGotoDO == null){
+            // todo 严谨来说此处需要风控
+            return;
+        }
+
+        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+                .eq(LinkDO::getGid, linkGotoDO.getGid())
+                .eq(LinkDO::getFullShortUrl,fullShortUrl)
+                .eq(LinkDO::getEnableStatus, 0)
+                .eq(LinkDO::getDelFlag, 0);
+
+        LinkDO linkDO = baseMapper.selectOne(queryWrapper);
+        if (linkDO != null){
+            ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
+        }
+
+    }
+
+    // todo 修改连接的groupID同时，把goto表里的也修改
     @Override
     public LinkCreateRespDTO createLink(LinkCreateReqDTO linkCreateReqDTO) {
         String suffix = generateSuffix(linkCreateReqDTO);
@@ -49,8 +85,14 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
 
+        LinkGotoDO linkGotoDO = LinkGotoDO.builder()
+                .fullShortUrl(fullShortUrl)
+                .gid(linkCreateReqDTO.getGid())
+                .build();
+
         try {
             baseMapper.insert(linkDO);
+            linkGotoMapper.insert(linkGotoDO);
         } catch (DuplicateKeyException ex){
             // 数据库已有数据
             // 第一种，短连接确实真实存在缓存，存在判不存在，插入数据库失败，这时候就要查询
