@@ -1,6 +1,7 @@
 package org.vakakawaii.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.server.HttpServerResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -16,7 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vakakawaii.shortlink.project.common.convention.exception.ClientException;
@@ -38,6 +42,9 @@ import org.vakakawaii.shortlink.project.toolkit.HashUtil;
 import java.util.List;
 import java.util.Map;
 
+import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
+import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY;
+
 
 @Service
 @Slf4j
@@ -46,32 +53,53 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
     private final RBloomFilter<String> linkUriCreateCachePenetrationBloomFilter;
     private final LinkGotoMapper linkGotoMapper;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final RedissonClient redissonClient;
 
     @SneakyThrows
     @Override
     public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
         String domain = request.getServerName();
         String fullShortUrl = domain + "/" + shortUri;
-
-        LambdaQueryWrapper<LinkGotoDO> gotoQueryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
-                .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
-        LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(gotoQueryWrapper);
-        if (linkGotoDO == null){
-            // todo 严谨来说此处需要风控
+        String originalLink = stringRedisTemplate.opsForValue()
+                .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+        if (StrUtil.isNotBlank(originalLink)){
+            ((HttpServletResponse) response).sendRedirect(originalLink);
             return;
         }
 
-        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
-                .eq(LinkDO::getGid, linkGotoDO.getGid())
-                .eq(LinkDO::getFullShortUrl,fullShortUrl)
-                .eq(LinkDO::getEnableStatus, 0)
-                .eq(LinkDO::getDelFlag, 0);
+        RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY,fullShortUrl));
+        lock.lock();
+        try {
+            originalLink = stringRedisTemplate.opsForValue()
+                    .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+            if (StrUtil.isNotBlank(originalLink)){
+                ((HttpServletResponse) response).sendRedirect(originalLink);
+                return;
+            }
+            LambdaQueryWrapper<LinkGotoDO> gotoQueryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
+                    .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
+            LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(gotoQueryWrapper);
+            if (linkGotoDO == null){
+                // todo 严谨来说此处需要风控
+                return;
+            }
 
-        LinkDO linkDO = baseMapper.selectOne(queryWrapper);
-        if (linkDO != null){
-            ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
+            LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+                    .eq(LinkDO::getGid, linkGotoDO.getGid())
+                    .eq(LinkDO::getFullShortUrl,fullShortUrl)
+                    .eq(LinkDO::getEnableStatus, 0)
+                    .eq(LinkDO::getDelFlag, 0);
+
+            LinkDO linkDO = baseMapper.selectOne(queryWrapper);
+            if (linkDO != null){
+                stringRedisTemplate.opsForValue()
+                        .set(String.format(GOTO_SHORT_LINK_KEY,fullShortUrl),linkDO.getOriginUrl());
+                ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
+            }
+        } finally {
+            lock.unlock();
         }
-
     }
 
     // todo 修改连接的groupID同时，把goto表里的也修改
