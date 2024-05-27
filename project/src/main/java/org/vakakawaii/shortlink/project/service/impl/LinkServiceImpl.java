@@ -2,7 +2,6 @@ package org.vakakawaii.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.server.HttpServerResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -41,9 +40,9 @@ import org.vakakawaii.shortlink.project.toolkit.HashUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
-import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY;
+import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.*;
 
 
 @Service
@@ -59,8 +58,12 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     @SneakyThrows
     @Override
     public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
+
         String domain = request.getServerName();
         String fullShortUrl = domain + "/" + shortUri;
+
+        // 对于一个链接访问
+        // 首先，如果 ”goto“ 缓存 存在，跳。
         String originalLink = stringRedisTemplate.opsForValue()
                 .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originalLink)){
@@ -68,6 +71,20 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             return;
         }
 
+        // 如果 ”goto“ 缓存 不存在，”链接创建的记录“ 布隆过滤器-缓存 认定不存在，退出
+        boolean contains = linkUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
+        if (!contains){
+            return;
+        }
+
+        // 如果 ”goto不存在已确定“ 缓存 存在("-")，退出
+        String gotoIsNullShortLink = stringRedisTemplate.opsForValue()
+                .get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
+        if (StrUtil.isNotBlank(gotoIsNullShortLink)){
+            return;
+        }
+
+        // 分布式锁 查数据库 “goto”
         RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY,fullShortUrl));
         lock.lock();
         try {
@@ -82,6 +99,9 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(gotoQueryWrapper);
             if (linkGotoDO == null){
                 // todo 严谨来说此处需要风控
+                stringRedisTemplate.opsForValue()
+                        .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl),"-",
+                                30, TimeUnit.MINUTES);
                 return;
             }
 
