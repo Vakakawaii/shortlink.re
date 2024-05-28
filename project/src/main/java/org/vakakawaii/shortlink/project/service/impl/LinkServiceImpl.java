@@ -37,6 +37,7 @@ import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
+import org.vakakawaii.shortlink.project.toolkit.LinkUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -114,7 +115,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             LinkDO linkDO = baseMapper.selectOne(queryWrapper);
             if (linkDO != null){
                 stringRedisTemplate.opsForValue()
-                        .set(String.format(GOTO_SHORT_LINK_KEY,fullShortUrl),linkDO.getOriginUrl());
+                        .set(String.format(GOTO_SHORT_LINK_KEY,fullShortUrl),linkDO.getOriginUrl(),
+                                30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
             }
         } finally {
@@ -158,6 +160,10 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 throw new ServiceException("短连接生成重复");
             }
         }
+        // 缓存预热
+        stringRedisTemplate.opsForValue().set(
+                String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),linkCreateReqDTO.getOriginUrl(),
+                LinkUtil.getLinkCacheValidTime(linkCreateReqDTO.getValidDate()),TimeUnit.MICROSECONDS);
         linkUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
         return LinkCreateRespDTO.builder()
                 .gid(linkDO.getGid())
