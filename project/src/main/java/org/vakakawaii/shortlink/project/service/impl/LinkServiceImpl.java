@@ -76,6 +76,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         // 如果 ”goto“ 缓存 不存在，”链接创建的记录“ 布隆过滤器-缓存 认定不存在，退出
         boolean contains = linkUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
         if (!contains){
+            ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
 
@@ -83,6 +84,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue()
                 .get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(gotoIsNullShortLink)){
+            ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
 
@@ -104,6 +106,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 stringRedisTemplate.opsForValue()
                         .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl),"-",
                                 30, TimeUnit.MINUTES);
+                ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
             }
 
@@ -120,6 +123,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     stringRedisTemplate.opsForValue()
                             .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl),"-",
                                     30, TimeUnit.MINUTES);
+                    ((HttpServletResponse) response).sendRedirect("/page/notfound");
+                    return;
                 }
                 stringRedisTemplate.opsForValue()
                         .set(String.format(GOTO_SHORT_LINK_KEY,fullShortUrl),linkDO.getOriginUrl(),
