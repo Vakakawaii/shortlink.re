@@ -15,6 +15,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -146,6 +149,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setFullShortUrl(fullShortUrl);
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
+//        linkDO.setFavicon(getFaviconUrl(linkCreateReqDTO.getOriginUrl()));
 
         LinkGotoDO linkGotoDO = LinkGotoDO.builder()
                 .fullShortUrl(fullShortUrl)
@@ -275,5 +279,23 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             customGenerateCount++;
         }
         return shortUri;
+    }
+
+    private String getFaviconUrl(String url) {
+        try {
+            // 连接到指定的URL并获取HTML内容
+            Document doc = Jsoup.connect(url).get();
+            // 查找HTML中的<link>标签，提取favicon链接
+            Elements links = doc.select("link[rel~=icon]");
+            if (!links.isEmpty()) {
+                // 如果存在带有rel属性值为"icon"的链接，则返回第一个找到的链接
+                return links.get(0).attr("href");
+            } else {
+                // 如果HTML中没有直接指定favicon链接，则尝试在默认位置查找
+                return url + "/favicon.ico";
+            }
+        } catch (Exception ex) {
+            throw new ServiceException("网页图标获取失败");
+        }
     }
 }
