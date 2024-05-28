@@ -39,6 +39,7 @@ import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
 import org.vakakawaii.shortlink.project.toolkit.LinkUtil;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -114,6 +115,12 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
             LinkDO linkDO = baseMapper.selectOne(queryWrapper);
             if (linkDO != null){
+                // 添加缓存区分过期短链
+                if(linkDO.getValidDate() != null && linkDO.getValidDate().before(new Date())){
+                    stringRedisTemplate.opsForValue()
+                            .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl),"-",
+                                    30, TimeUnit.MINUTES);
+                }
                 stringRedisTemplate.opsForValue()
                         .set(String.format(GOTO_SHORT_LINK_KEY,fullShortUrl),linkDO.getOriginUrl(),
                                 30, TimeUnit.MINUTES);
