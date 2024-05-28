@@ -20,7 +20,7 @@ public class UrlTitleController {
      * 获取网页标题
      * @param url
      */
-    @GetMapping("/api/short_link/title")
+    @GetMapping("/api/short_link/v1/title")
     public Result<String> getTitleByUrl(@PathParam("url") String url){
         return Results.success(urlTitleService.getTitleByUrl(url));
     }

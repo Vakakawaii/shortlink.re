@@ -56,4 +56,11 @@ public interface LinkRemoteService {
         return JSON.parseObject(resultListStr, new TypeReference<>() {
         });
     }
+
+    default Result<String> getTitleByUrl(String url){
+        String resultStr = HttpUtil
+                .get("http://127.0.0.1:8010/api/short_link/v1/title?url="+url);
+        return JSON.parseObject(resultStr, new TypeReference<>() {
+        });
+    }
 }
