@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
+import org.vakakawaii.shortlink.admin.remote.dto.req.BinSaveReqDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.req.LinkUpdateReqDTO;
@@ -62,5 +63,11 @@ public interface LinkRemoteService {
                 .get("http://127.0.0.1:8010/api/short_link/v1/title?url="+url);
         return JSON.parseObject(resultStr, new TypeReference<>() {
         });
+    }
+
+    default Result<Void> saveBin(BinSaveReqDTO binSaveReqDTO){
+        HttpUtil.post("http://127.0.0.1:8010/api/short_link/v1/bin/save",
+                JSON.toJSONString(binSaveReqDTO));
+        return Results.success();
     }
 }

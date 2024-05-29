@@ -71,14 +71,14 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         // 首先，如果 ”goto“ 缓存 存在，跳。
         String originalLink = stringRedisTemplate.opsForValue()
                 .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
-        if (StrUtil.isNotBlank(originalLink)){
+        if (StrUtil.isNotBlank(originalLink)) {
             ((HttpServletResponse) response).sendRedirect(originalLink);
             return;
         }
 
         // 如果 ”goto“ 缓存 不存在，”链接创建的记录“ 布隆过滤器-缓存 认定不存在，退出
         boolean contains = linkUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
-        if (!contains){
+        if (!contains) {
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
@@ -86,28 +86,28 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         // 如果 ”goto不存在已确定“ 缓存 存在("-")，退出
         String gotoIsNullShortLink = stringRedisTemplate.opsForValue()
                 .get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
-        if (StrUtil.isNotBlank(gotoIsNullShortLink)){
+        if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
             ((HttpServletResponse) response).sendRedirect("/page/notfound");
             return;
         }
 
         // 分布式锁 查数据库 “goto”
-        RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY,fullShortUrl));
+        RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
         lock.lock();
         try {
             originalLink = stringRedisTemplate.opsForValue()
                     .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
-            if (StrUtil.isNotBlank(originalLink)){
+            if (StrUtil.isNotBlank(originalLink)) {
                 ((HttpServletResponse) response).sendRedirect(originalLink);
                 return;
             }
             LambdaQueryWrapper<LinkGotoDO> gotoQueryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
                     .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
             LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(gotoQueryWrapper);
-            if (linkGotoDO == null){
+            if (linkGotoDO == null) {
                 // todo 严谨来说此处需要风控
                 stringRedisTemplate.opsForValue()
-                        .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl),"-",
+                        .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-",
                                 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
@@ -115,25 +115,24 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
             LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
                     .eq(LinkDO::getGid, linkGotoDO.getGid())
-                    .eq(LinkDO::getFullShortUrl,fullShortUrl)
+                    .eq(LinkDO::getFullShortUrl, fullShortUrl)
                     .eq(LinkDO::getEnableStatus, 0)
                     .eq(LinkDO::getDelFlag, 0);
 
             LinkDO linkDO = baseMapper.selectOne(queryWrapper);
-            if (linkDO != null){
-                // 添加缓存区分过期短链
-                if(linkDO.getValidDate() != null && linkDO.getValidDate().before(new Date())){
-                    stringRedisTemplate.opsForValue()
-                            .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl),"-",
-                                    30, TimeUnit.MINUTES);
-                    ((HttpServletResponse) response).sendRedirect("/page/notfound");
-                    return;
-                }
+
+            // 添加缓存区分过期短链 和 回收站短链
+            if (linkDO == null || (linkDO.getValidDate() != null && linkDO.getValidDate().before(new Date()))) {
                 stringRedisTemplate.opsForValue()
-                        .set(String.format(GOTO_SHORT_LINK_KEY,fullShortUrl),linkDO.getOriginUrl(),
+                        .set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-",
                                 30, TimeUnit.MINUTES);
-                ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
+                ((HttpServletResponse) response).sendRedirect("/page/notfound");
+                return;
             }
+            stringRedisTemplate.opsForValue()
+                    .set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), linkDO.getOriginUrl(),
+                            30, TimeUnit.MINUTES);
+            ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
         } finally {
             lock.unlock();
         }
@@ -159,7 +158,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         try {
             baseMapper.insert(linkDO);
             linkGotoMapper.insert(linkGotoDO);
-        } catch (DuplicateKeyException ex){
+        } catch (DuplicateKeyException ex) {
             // 数据库已有数据
             // 第一种，短连接确实真实存在缓存，存在判不存在，插入数据库失败，这时候就要查询
             // 第二种，短连接不一定存在于缓存，判断不存在（缓存丢失，多线程）
@@ -171,15 +170,15 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
                     .eq(LinkDO::getFullShortUrl, linkDO.getFullShortUrl());
             LinkDO hashLinkDO = baseMapper.selectOne(queryWrapper);
-            if(hashLinkDO == null){
+            if (hashLinkDO == null) {
                 log.warn("短连接: {} 重复入库", fullShortUrl);
                 throw new ServiceException("短连接生成重复");
             }
         }
         // 缓存预热
         stringRedisTemplate.opsForValue().set(
-                String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),linkCreateReqDTO.getOriginUrl(),
-                LinkUtil.getLinkCacheValidTime(linkCreateReqDTO.getValidDate()),TimeUnit.MICROSECONDS);
+                String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), linkCreateReqDTO.getOriginUrl(),
+                LinkUtil.getLinkCacheValidTime(linkCreateReqDTO.getValidDate()), TimeUnit.MICROSECONDS);
         linkUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
         return LinkCreateRespDTO.builder()
                 .gid(linkDO.getGid())
@@ -198,7 +197,9 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .eq(LinkDO::getEnableStatus, 0)
                 .eq(LinkDO::getDelFlag, 0);
         LinkDO hasLinkDO = baseMapper.selectOne(queryWrapper);
-        if (hasLinkDO == null) {throw new ClientException("短连接记录不存在");}
+        if (hasLinkDO == null) {
+            throw new ClientException("短连接记录不存在");
+        }
 
         LinkDO linkDO = LinkDO.builder()
                 // 先不更改，因为涉及缓存
@@ -217,7 +218,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .build();
 
         // gid相同则在一个表内更新
-        if (Objects.equal(linkUpdateReqDTO.getOriginGid(),linkUpdateReqDTO.getGid())) {
+        if (Objects.equal(linkUpdateReqDTO.getOriginGid(), linkUpdateReqDTO.getGid())) {
             LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
                     .eq(LinkDO::getFullShortUrl, linkUpdateReqDTO.getFullShortUrl())
                     .eq(LinkDO::getGid, linkUpdateReqDTO.getGid())
@@ -225,7 +226,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .eq(LinkDO::getEnableStatus, 0)
                     .set(Objects.equal(linkUpdateReqDTO.getValidDateType(), VailDateTypeEnum.PERMANENT.getType()),
                             LinkDO::getValidDate, null);
-            baseMapper.update(linkDO,updateWrapper);
+            baseMapper.update(linkDO, updateWrapper);
         } else {
 //            否则先删除，再增加
             LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
@@ -243,11 +244,11 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     public IPage<LinkPageRespDTO> pageLink(LinkPageReqDTO linkPageReqDTO) {
         LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
                 .eq(LinkDO::getGid, linkPageReqDTO.getGid())
-                .eq(LinkDO::getEnableStatus,0)
-                .eq(LinkDO::getDelFlag,0)
+                .eq(LinkDO::getEnableStatus, 0)
+                .eq(LinkDO::getDelFlag, 0)
                 .orderByDesc(LinkDO::getCreateTime);
-        IPage<LinkDO> page = baseMapper.selectPage(linkPageReqDTO,queryWrapper);
-        return page.convert(each -> BeanUtil.toBean(each,LinkPageRespDTO.class));
+        IPage<LinkDO> page = baseMapper.selectPage(linkPageReqDTO, queryWrapper);
+        return page.convert(each -> BeanUtil.toBean(each, LinkPageRespDTO.class));
     }
 
     @Override
@@ -258,7 +259,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .eq("enable_status", 0)
                 .groupBy("gid");
         List<Map<String, Object>> list = baseMapper.selectMaps(queryWrapper);
-        return BeanUtil.copyToList(list,LinkCountQueryRespDTO.class);
+        return BeanUtil.copyToList(list, LinkCountQueryRespDTO.class);
     }
 
     private String generateSuffix(LinkCreateReqDTO linkCreateReqDTO) {
