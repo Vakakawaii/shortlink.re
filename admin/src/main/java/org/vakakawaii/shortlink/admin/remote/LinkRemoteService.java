@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
-import org.vakakawaii.shortlink.admin.remote.dto.req.BinSaveReqDTO;
-import org.vakakawaii.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
-import org.vakakawaii.shortlink.admin.remote.dto.req.LinkPageReqDTO;
-import org.vakakawaii.shortlink.admin.remote.dto.req.LinkUpdateReqDTO;
+import org.vakakawaii.shortlink.admin.remote.dto.req.*;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
@@ -69,5 +66,16 @@ public interface LinkRemoteService {
         HttpUtil.post("http://127.0.0.1:8010/api/short_link/v1/bin/save",
                 JSON.toJSONString(binSaveReqDTO));
         return Results.success();
+    }
+
+    default Result<IPage<LinkPageRespDTO>> pageBin(BinPageReqDTO binPageReqDTO){
+        Map<String,Object> requestMap = new HashMap<>();
+        requestMap.put("gids",binPageReqDTO.getGids());
+        requestMap.put("current", binPageReqDTO.getCurrent());
+        requestMap.put("size", binPageReqDTO.getSize());
+        String resultPageStr = HttpUtil
+                .get("http://127.0.0.1:8010/api/short_link/v1/bin/page",requestMap);
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
     }
 }
