@@ -78,4 +78,10 @@ public interface LinkRemoteService {
         return JSON.parseObject(resultPageStr, new TypeReference<>() {
         });
     }
+
+    default Result<Void> recoverBin(BinSaveReqDTO binSaveReqDTO){
+        HttpUtil.post("http://127.0.0.1:8010/api/short_link/v1/bin/recover",
+                JSON.toJSONString(binSaveReqDTO));
+        return Results.success();
+    }
 }

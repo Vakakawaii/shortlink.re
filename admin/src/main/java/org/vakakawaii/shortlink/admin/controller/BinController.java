@@ -32,4 +32,9 @@ public class BinController {
     public Result<IPage<LinkPageRespDTO>> pageLink(BinPageReqDTO binPageReqDTO){
         return binService.pageBin(binPageReqDTO);
     }
+
+    @PostMapping("/api/short_link/admin/v1/bin/recover")
+    public Result<Void> recoverBin(@RequestBody BinSaveReqDTO binSaveReqDTO){
+        return  linkRemoteService.recoverBin(binSaveReqDTO);
+    }
 }

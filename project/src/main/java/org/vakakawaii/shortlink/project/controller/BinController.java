@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.vakakawaii.shortlink.project.common.convention.result.Result;
 import org.vakakawaii.shortlink.project.common.convention.result.Results;
 import org.vakakawaii.shortlink.project.dto.req.BinPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.BinRecoverReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.BinSaveReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
@@ -32,4 +33,9 @@ public class BinController {
         return Results.success(binService.pageBin(binPageReqDTO));
     }
 
+    @PostMapping("/api/short_link/v1/bin/recover")
+    public Result<Void> recoverBin(@RequestBody BinRecoverReqDTO binRecoverReqDTO){
+        binService.recoverBin(binRecoverReqDTO);
+        return Results.success();
+    }
 }

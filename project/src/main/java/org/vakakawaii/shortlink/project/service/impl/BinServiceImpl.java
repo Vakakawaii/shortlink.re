@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
 import org.vakakawaii.shortlink.project.dto.req.BinPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.BinRecoverReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.BinSaveReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
@@ -19,6 +20,7 @@ import org.vakakawaii.shortlink.project.service.BinService;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
 import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
 
 @Service
@@ -54,6 +56,25 @@ public class BinServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements B
                 .orderByDesc(LinkDO::getUpdateTime);
         IPage<LinkDO> page = baseMapper.selectPage(binPageReqDTO, queryWrapper);
         return page.convert(each -> BeanUtil.toBean(each, LinkPageRespDTO.class));
+    }
+
+    @Override
+    public void recoverBin(BinRecoverReqDTO binRecoverReqDTO) {
+        LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
+                .eq(LinkDO::getGid, binRecoverReqDTO.getGid())
+                .eq(LinkDO::getFullShortUrl, binRecoverReqDTO.getFullShortUrl())
+                .eq(LinkDO::getEnableStatus, 1)
+                .eq(LinkDO::getDelFlag, 0);
+
+        LinkDO linkDO = LinkDO.builder()
+                .enableStatus(0)
+                .build();
+
+        baseMapper.update(linkDO,updateWrapper);
+
+        // 删除缓存
+        stringRedisTemplate.delete(
+                String.format(GOTO_IS_NULL_SHORT_LINK_KEY, binRecoverReqDTO.getFullShortUrl()));
     }
 
 }
