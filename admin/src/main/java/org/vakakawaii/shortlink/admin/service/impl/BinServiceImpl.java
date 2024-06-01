@@ -15,6 +15,7 @@ import org.vakakawaii.shortlink.admin.dao.entity.GroupDO;
 import org.vakakawaii.shortlink.admin.dao.mapper.GroupMapper;
 import org.vakakawaii.shortlink.admin.remote.LinkRemoteService;
 import org.vakakawaii.shortlink.admin.remote.dto.req.BinPageReqDTO;
+import org.vakakawaii.shortlink.admin.remote.dto.resp.BinPageRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.admin.service.BinService;
 
@@ -36,7 +37,7 @@ public class BinServiceImpl implements BinService {
     private final GroupMapper groupMapper;
 
     @Override
-    public Result<IPage<LinkPageRespDTO>> pageBin(BinPageReqDTO binPageReqDTO) {
+    public Result<IPage<BinPageRespDTO>> pageBin(BinPageReqDTO binPageReqDTO) {
         LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getUsername, UserContext.getUsername())
                 .eq(GroupDO::getDelFlag, 0);

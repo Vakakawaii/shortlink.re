@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.vakakawaii.shortlink.project.common.convention.result.Result;
 import org.vakakawaii.shortlink.project.common.convention.result.Results;
-import org.vakakawaii.shortlink.project.dto.req.BinPageReqDTO;
-import org.vakakawaii.shortlink.project.dto.req.BinRecoverReqDTO;
-import org.vakakawaii.shortlink.project.dto.req.BinSaveReqDTO;
-import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.*;
+import org.vakakawaii.shortlink.project.dto.resp.BinPageRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.BinService;
 
@@ -29,13 +27,19 @@ public class BinController {
 
 
     @GetMapping("/api/short_link/v1/bin/page")
-    public Result<IPage<LinkPageRespDTO>> pageLink(BinPageReqDTO binPageReqDTO){
+    public Result<IPage<BinPageRespDTO>> pageLink(BinPageReqDTO binPageReqDTO){
         return Results.success(binService.pageBin(binPageReqDTO));
     }
 
     @PostMapping("/api/short_link/v1/bin/recover")
     public Result<Void> recoverBin(@RequestBody BinRecoverReqDTO binRecoverReqDTO){
         binService.recoverBin(binRecoverReqDTO);
+        return Results.success();
+    }
+
+    @PostMapping("/api/short_link/v1/bin/delete")
+    public Result<Void> delBin(@RequestBody BinDeleteReqDTO binDeleteReqDTO){
+        binService.delBin(binDeleteReqDTO);
         return Results.success();
     }
 }

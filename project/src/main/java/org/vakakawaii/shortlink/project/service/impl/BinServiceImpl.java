@@ -11,10 +11,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
-import org.vakakawaii.shortlink.project.dto.req.BinPageReqDTO;
-import org.vakakawaii.shortlink.project.dto.req.BinRecoverReqDTO;
-import org.vakakawaii.shortlink.project.dto.req.BinSaveReqDTO;
-import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
+import org.vakakawaii.shortlink.project.dto.req.*;
+import org.vakakawaii.shortlink.project.dto.resp.BinPageRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.BinService;
 
@@ -48,14 +46,14 @@ public class BinServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements B
     }
 
     @Override
-    public IPage<LinkPageRespDTO> pageBin(BinPageReqDTO binPageReqDTO) {
+    public IPage<BinPageRespDTO> pageBin(BinPageReqDTO binPageReqDTO) {
         LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
                 .in(LinkDO::getGid, binPageReqDTO.getGids())
                 .eq(LinkDO::getEnableStatus, 1)
                 .eq(LinkDO::getDelFlag, 0)
                 .orderByDesc(LinkDO::getUpdateTime);
         IPage<LinkDO> page = baseMapper.selectPage(binPageReqDTO, queryWrapper);
-        return page.convert(each -> BeanUtil.toBean(each, LinkPageRespDTO.class));
+        return page.convert(each -> BeanUtil.toBean(each, BinPageRespDTO.class));
     }
 
     @Override
@@ -75,6 +73,17 @@ public class BinServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements B
         // 删除缓存
         stringRedisTemplate.delete(
                 String.format(GOTO_IS_NULL_SHORT_LINK_KEY, binRecoverReqDTO.getFullShortUrl()));
+    }
+
+    @Override
+    public void delBin(BinDeleteReqDTO binDeleteReqDTO) {
+        LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
+                .eq(LinkDO::getGid, binDeleteReqDTO.getGid())
+                .eq(LinkDO::getFullShortUrl, binDeleteReqDTO.getFullShortUrl())
+                .eq(LinkDO::getEnableStatus, 1)
+                .eq(LinkDO::getDelFlag, 0);
+
+        baseMapper.delete(updateWrapper);
     }
 
 }

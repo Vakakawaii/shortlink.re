@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
 import org.vakakawaii.shortlink.admin.remote.dto.req.*;
+import org.vakakawaii.shortlink.admin.remote.dto.resp.BinPageRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
@@ -68,7 +69,7 @@ public interface LinkRemoteService {
         return Results.success();
     }
 
-    default Result<IPage<LinkPageRespDTO>> pageBin(BinPageReqDTO binPageReqDTO){
+    default Result<IPage<BinPageRespDTO>> pageBin(BinPageReqDTO binPageReqDTO){
         Map<String,Object> requestMap = new HashMap<>();
         requestMap.put("gids",binPageReqDTO.getGids());
         requestMap.put("current", binPageReqDTO.getCurrent());
@@ -82,6 +83,12 @@ public interface LinkRemoteService {
     default Result<Void> recoverBin(BinSaveReqDTO binSaveReqDTO){
         HttpUtil.post("http://127.0.0.1:8010/api/short_link/v1/bin/recover",
                 JSON.toJSONString(binSaveReqDTO));
+        return Results.success();
+    }
+
+    default Result<Void> delBin(BinDeleteReqDTO binDeleteReqDTO){
+        HttpUtil.post("http://127.0.0.1:8010/api/short_link/v1/bin/delete",
+                JSON.toJSONString(binDeleteReqDTO));
         return Results.success();
     }
 }
