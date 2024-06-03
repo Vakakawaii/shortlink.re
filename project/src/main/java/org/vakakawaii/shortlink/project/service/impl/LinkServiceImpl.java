@@ -1,6 +1,8 @@
 package org.vakakawaii.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.Week;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -28,8 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.vakakawaii.shortlink.project.common.convention.exception.ClientException;
 import org.vakakawaii.shortlink.project.common.convention.exception.ServiceException;
 import org.vakakawaii.shortlink.project.common.enums.VailDateTypeEnum;
+import org.vakakawaii.shortlink.project.dao.entity.LinkAccessStatsDO;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
 import org.vakakawaii.shortlink.project.dao.entity.LinkGotoDO;
+import org.vakakawaii.shortlink.project.dao.mapper.LinkAccessStatsMapper;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkGotoMapper;
 import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
@@ -59,6 +63,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkGotoMapper linkGotoMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
+    private final LinkAccessStatsMapper linkAccessStatsMapper;
 
     @SneakyThrows
     @Override
@@ -72,6 +77,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         String originalLink = stringRedisTemplate.opsForValue()
                 .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originalLink)) {
+            linkStats(fullShortUrl,null,request,response);
             ((HttpServletResponse) response).sendRedirect(originalLink);
             return;
         }
@@ -98,6 +104,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             originalLink = stringRedisTemplate.opsForValue()
                     .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(originalLink)) {
+                linkStats(fullShortUrl,null,request,response);
                 ((HttpServletResponse) response).sendRedirect(originalLink);
                 return;
             }
@@ -132,11 +139,38 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             stringRedisTemplate.opsForValue()
                     .set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), linkDO.getOriginUrl(),
                             30, TimeUnit.MINUTES);
+            linkStats(fullShortUrl,linkDO.getGid(),request,response);
             ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
         } finally {
             lock.unlock();
         }
     }
+
+    private void linkStats(String fullShortUrl, String gid, ServletRequest request, ServletResponse response){
+        if (StrUtil.isBlank(gid)){
+            LambdaQueryWrapper<LinkGotoDO> queryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
+                    .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
+            LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(queryWrapper);
+            gid = linkGotoDO.getGid();
+        }
+
+        int hour = DateUtil.hour(new Date(), true);
+        Week week = DateUtil.dayOfWeekEnum(new Date());
+        int weekValue = week.getValue();
+        LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
+                .pv(1)
+                .uv(1)
+                .uip(1)
+                .date(new Date())
+                .weekday(weekValue)
+                .fullShortUrl(fullShortUrl)
+                .gid(gid)
+                .hour(hour)
+                .build();
+        linkAccessStatsMapper.linkStats(linkAccessStatsDO);
+
+    }
+
 
     // todo 修改连接的groupID同时，把goto表里的也修改
     @Override
