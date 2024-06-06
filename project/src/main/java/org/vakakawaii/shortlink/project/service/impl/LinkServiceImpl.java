@@ -48,6 +48,7 @@ import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
+import org.vakakawaii.shortlink.project.toolkit.IPUtils;
 import org.vakakawaii.shortlink.project.toolkit.LinkUtil;
 
 import java.util.Arrays;
@@ -154,30 +155,59 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
     private void linkStats(String fullShortUrl, String gid, ServletRequest request, ServletResponse response) {
 
+        // 创建一个 AtomicBoolean 类型的变量 uvFirstFlag，初始值为 false，用于标记是否是第一次访问
         AtomicBoolean uvFirstFlag = new AtomicBoolean();
+
+        // 从请求中获取所有的 Cookies
         Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+
         try {
+            // 创建一个 Runnable 对象 addResponseCookieTask，其 run 方法包含生成新 UUID 并添加到响应中的逻辑
             Runnable addResponseCookieTask = () -> {
+                // 生成一个新的 UUID 作为 uv
                 String uv = UUID.fastUUID().toString();
+                // 创建一个名为 "uv" 的 Cookie，并将其值设为生成的 UUID
                 Cookie uvCookie = new Cookie("uv", uv);
+                // 设置 Cookie 的有效期为 30 天（以秒为单位）
                 uvCookie.setMaxAge(30 * 24 * 60 * 60);
+                // 设置 Cookie 的路径
                 uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.indexOf("/"), fullShortUrl.length()));
+                // 将该 Cookie 添加到响应中
                 ((HttpServletResponse) response).addCookie(uvCookie);
+                // 将 uvFirstFlag 设置为 true，表示这是第一次访问
                 uvFirstFlag.set(Boolean.TRUE);
+                // 将生成的 UUID 添加到 Redis 集合中
                 Long added = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, uv);
             };
+
+            // 检查请求中的 Cookies 是否为空
             if (ArrayUtil.isNotEmpty(cookies)) {
+                // 如果 Cookies 不为空，则进行以下操作
                 Arrays.stream(cookies)
+                        // 将 Cookies 转换成流，并过滤出名称为 "uv" 的 Cookie
                         .filter(each -> Objects.equal(each.getName(), "uv"))
+                        // 找到第一个匹配的 "uv" Cookie
                         .findFirst()
+                        // 提取该 Cookie 的值
                         .map(Cookie::getValue)
+                        // 如果找到了 "uv" Cookie，则执行 ifPresentOrElse 的第一个参数中的逻辑
                         .ifPresentOrElse(each -> {
-                            Long added = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, each);
-                            uvFirstFlag.set(added != null && added > 0L);
-                        }, addResponseCookieTask);
+                                    // 将 Cookie 的值添加到 Redis 集合中
+                                    Long uvAdded = stringRedisTemplate
+                                            .opsForSet().add("short-link:stats:uv:" + fullShortUrl, each);
+                                    // 根据 Redis 操作结果设置 uvFirstFlag
+                                    uvFirstFlag.set(uvAdded != null && uvAdded > 0L);
+                                },
+                                // 如果没有找到 "uv" Cookie，则执行 addResponseCookieTask 逻辑
+                                addResponseCookieTask);
             } else {
+                // 如果 Cookies 为空，则执行 addResponseCookieTask 逻辑
                 addResponseCookieTask.run();
             }
+
+            String remoteAddr = IPUtils.getRealIp((HttpServletRequest) request);
+            Long uipAdded = stringRedisTemplate.opsForSet().add("short-link:stats:uip:" + fullShortUrl, remoteAddr);
+            boolean uipFirstFlag = uipAdded != null && uipAdded > 0L;
 
             if (StrUtil.isBlank(gid)) {
                 LambdaQueryWrapper<LinkGotoDO> queryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
@@ -192,7 +222,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
                     .pv(1)
                     .uv(uvFirstFlag.get() ? 1 : 0)
-                    .uip(1)
+                    .uip(uipFirstFlag ? 1 : 0)
                     .date(new Date())
                     .weekday(weekValue)
                     .fullShortUrl(fullShortUrl)
