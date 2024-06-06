@@ -3,6 +3,8 @@ package org.vakakawaii.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
+import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -13,6 +15,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.base.Objects;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -46,10 +50,12 @@ import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
 import org.vakakawaii.shortlink.project.toolkit.LinkUtil;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.*;
 
@@ -77,7 +83,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         String originalLink = stringRedisTemplate.opsForValue()
                 .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originalLink)) {
-            linkStats(fullShortUrl,null,request,response);
+            linkStats(fullShortUrl, null, request, response);
             ((HttpServletResponse) response).sendRedirect(originalLink);
             return;
         }
@@ -104,7 +110,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             originalLink = stringRedisTemplate.opsForValue()
                     .get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(originalLink)) {
-                linkStats(fullShortUrl,null,request,response);
+                linkStats(fullShortUrl, null, request, response);
                 ((HttpServletResponse) response).sendRedirect(originalLink);
                 return;
             }
@@ -139,36 +145,64 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             stringRedisTemplate.opsForValue()
                     .set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), linkDO.getOriginUrl(),
                             30, TimeUnit.MINUTES);
-            linkStats(fullShortUrl,linkDO.getGid(),request,response);
+            linkStats(fullShortUrl, linkDO.getGid(), request, response);
             ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
         } finally {
             lock.unlock();
         }
     }
 
-    private void linkStats(String fullShortUrl, String gid, ServletRequest request, ServletResponse response){
-        if (StrUtil.isBlank(gid)){
-            LambdaQueryWrapper<LinkGotoDO> queryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
-                    .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
-            LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(queryWrapper);
-            gid = linkGotoDO.getGid();
+    private void linkStats(String fullShortUrl, String gid, ServletRequest request, ServletResponse response) {
+
+        AtomicBoolean uvFirstFlag = new AtomicBoolean();
+        Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+        try {
+            Runnable addResponseCookieTask = () -> {
+                String uv = UUID.fastUUID().toString();
+                Cookie uvCookie = new Cookie("uv", uv);
+                uvCookie.setMaxAge(30 * 24 * 60 * 60);
+                uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.indexOf("/"), fullShortUrl.length()));
+                ((HttpServletResponse) response).addCookie(uvCookie);
+                uvFirstFlag.set(Boolean.TRUE);
+                Long added = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, uv);
+            };
+            if (ArrayUtil.isNotEmpty(cookies)) {
+                Arrays.stream(cookies)
+                        .filter(each -> Objects.equal(each.getName(), "uv"))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        .ifPresentOrElse(each -> {
+                            Long added = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, each);
+                            uvFirstFlag.set(added != null && added > 0L);
+                        }, addResponseCookieTask);
+            } else {
+                addResponseCookieTask.run();
+            }
+
+            if (StrUtil.isBlank(gid)) {
+                LambdaQueryWrapper<LinkGotoDO> queryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
+                        .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
+                LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(queryWrapper);
+                gid = linkGotoDO.getGid();
+            }
+
+            int hour = DateUtil.hour(new Date(), true);
+            Week week = DateUtil.dayOfWeekEnum(new Date());
+            int weekValue = week.getValue();
+            LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
+                    .pv(1)
+                    .uv(uvFirstFlag.get() ? 1 : 0)
+                    .uip(1)
+                    .date(new Date())
+                    .weekday(weekValue)
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .hour(hour)
+                    .build();
+            linkAccessStatsMapper.linkStats(linkAccessStatsDO);
+        } catch (Throwable ex) {
+            log.error("短连接统计时异常!", ex);
         }
-
-        int hour = DateUtil.hour(new Date(), true);
-        Week week = DateUtil.dayOfWeekEnum(new Date());
-        int weekValue = week.getValue();
-        LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
-                .pv(1)
-                .uv(1)
-                .uip(1)
-                .date(new Date())
-                .weekday(weekValue)
-                .fullShortUrl(fullShortUrl)
-                .gid(gid)
-                .hour(hour)
-                .build();
-        linkAccessStatsMapper.linkStats(linkAccessStatsDO);
-
     }
 
 
