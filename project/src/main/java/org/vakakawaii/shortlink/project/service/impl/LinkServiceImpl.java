@@ -38,14 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.vakakawaii.shortlink.project.common.convention.exception.ClientException;
 import org.vakakawaii.shortlink.project.common.convention.exception.ServiceException;
 import org.vakakawaii.shortlink.project.common.enums.VailDateTypeEnum;
-import org.vakakawaii.shortlink.project.dao.entity.LinkAccessStatsDO;
-import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
-import org.vakakawaii.shortlink.project.dao.entity.LinkGotoDO;
-import org.vakakawaii.shortlink.project.dao.entity.LinkLocateStatsDO;
-import org.vakakawaii.shortlink.project.dao.mapper.LinkAccessStatsMapper;
-import org.vakakawaii.shortlink.project.dao.mapper.LinkGotoMapper;
-import org.vakakawaii.shortlink.project.dao.mapper.LinkLocateStatsMapper;
-import org.vakakawaii.shortlink.project.dao.mapper.LinkMapper;
+import org.vakakawaii.shortlink.project.dao.entity.*;
+import org.vakakawaii.shortlink.project.dao.mapper.*;
 import org.vakakawaii.shortlink.project.dto.req.LinkCreateReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkUpdateReqDTO;
@@ -54,7 +48,6 @@ import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
-import org.vakakawaii.shortlink.project.toolkit.IPUtils;
 import org.vakakawaii.shortlink.project.toolkit.LinkUtil;
 
 import java.util.*;
@@ -76,6 +69,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final RedissonClient redissonClient;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
     private final LinkLocateStatsMapper linkLocateStatsMapper;
+    private final LinkOsStatsMapper linkOsStatsMapper;
 
     @Value("${short-link.stats.locate.amap-key}")
     private String statsLocateAmapKey;
@@ -213,7 +207,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 addResponseCookieTask.run();
             }
 
-            String remoteAddr = IPUtils.getRealIp((HttpServletRequest) request);
+            String remoteAddr = LinkUtil.getRealIp((HttpServletRequest) request);
             Long uipAdded = stringRedisTemplate.opsForSet().add("short-link:stats:uip:" + fullShortUrl, remoteAddr);
             boolean uipFirstFlag = uipAdded != null && uipAdded > 0L;
 
@@ -264,6 +258,16 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
                 linkLocateStatsMapper.linkLocateStats(linkLocateStatsDO);
             }
+
+            // 操作系统统计
+            LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .date(new Date())
+                    .cnt(1)
+                    .os(LinkUtil.getOs((HttpServletRequest) request))
+                    .build();
+            linkOsStatsMapper.linkOsStats(linkOsStatsDO);
 
         } catch (Throwable ex) {
             log.error("短连接统计时异常!", ex);
