@@ -53,6 +53,7 @@ import org.vakakawaii.shortlink.project.toolkit.LinkUtil;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.vakakawaii.shortlink.project.common.constant.LinkConstant.AMAP_REMOTE_URL;
 import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.*;
@@ -71,6 +72,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkLocateStatsMapper linkLocateStatsMapper;
     private final LinkOsStatsMapper linkOsStatsMapper;
     private final LinkBrowserStatsMapper linkBrowserStatsMapper;
+    private final LinkAccessLogsMapper linkAccessLogsMapper;
 
     @Value("${short-link.stats.locate.amap-key}")
     private String statsLocateAmapKey;
@@ -165,12 +167,13 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         Cookie[] cookies = ((HttpServletRequest) request).getCookies();
 
         try {
+            AtomicReference<String> uv = new AtomicReference<>();
             // 创建一个 Runnable 对象 addResponseCookieTask，其 run 方法包含生成新 UUID 并添加到响应中的逻辑
             Runnable addResponseCookieTask = () -> {
                 // 生成一个新的 UUID 作为 uv
-                String uv = UUID.fastUUID().toString();
+                uv.set(UUID.fastUUID().toString());
                 // 创建一个名为 "uv" 的 Cookie，并将其值设为生成的 UUID
-                Cookie uvCookie = new Cookie("uv", uv);
+                Cookie uvCookie = new Cookie("uv", uv.get());
                 // 设置 Cookie 的有效期为 30 天（以秒为单位）
                 uvCookie.setMaxAge(30 * 24 * 60 * 60);
                 // 设置 Cookie 的路径
@@ -180,7 +183,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 // 将 uvFirstFlag 设置为 true，表示这是第一次访问
                 uvFirstFlag.set(Boolean.TRUE);
                 // 将生成的 UUID 添加到 Redis 集合中
-                Long added = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, uv);
+                Long added = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, uv.get());
             };
 
             // 检查请求中的 Cookies 是否为空
@@ -195,6 +198,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                         .map(Cookie::getValue)
                         // 如果找到了 "uv" Cookie，则执行 ifPresentOrElse 的第一个参数中的逻辑
                         .ifPresentOrElse(each -> {
+                                    uv.set(each);
                                     // 将 Cookie 的值添加到 Redis 集合中
                                     Long uvAdded = stringRedisTemplate
                                             .opsForSet().add("short-link:stats:uv:" + fullShortUrl, each);
@@ -235,22 +239,22 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             linkAccessStatsMapper.linkStats(linkAccessStatsDO);
 
             // IP地区统计
-            Map<String,Object> locateParamMap = new HashMap<>();
+            Map<String, Object> locateParamMap = new HashMap<>();
             locateParamMap.put("key", statsLocateAmapKey);
-            locateParamMap.put("ip",remoteAddr);
+            locateParamMap.put("ip", remoteAddr);
             String locateResultStr = HttpUtil.get(AMAP_REMOTE_URL, locateParamMap);
             JSONObject locateResultObj = JSON.parseObject(locateResultStr);
             String infoCode = locateResultObj.getString("infocode");
 
-            if (StrUtil.isNotBlank(infoCode) && StrUtil.equals(infoCode, "10000")){
+            if (StrUtil.isNotBlank(infoCode) && StrUtil.equals(infoCode, "10000")) {
                 String province = locateResultObj.getString("province");
-                boolean unknownFlag = StrUtil.equals(province,"[]");
+                boolean unknownFlag = StrUtil.equals(province, "[]");
 
                 LinkLocateStatsDO linkLocateStatsDO = LinkLocateStatsDO.builder()
                         .fullShortUrl(fullShortUrl)
-                        .province(unknownFlag? "未知":province)
-                        .city(unknownFlag? "未知":locateResultObj.getString("city"))
-                        .adcode(unknownFlag? "未知":locateResultObj.getString("adcode"))
+                        .province(unknownFlag ? "未知" : province)
+                        .city(unknownFlag ? "未知" : locateResultObj.getString("city"))
+                        .adcode(unknownFlag ? "未知" : locateResultObj.getString("adcode"))
                         .country("中国")
                         .cnt(1)
                         .gid(gid)
@@ -261,24 +265,37 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             }
 
             // 操作系统统计
+            String os = LinkUtil.getOs((HttpServletRequest) request);
             LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
                     .fullShortUrl(fullShortUrl)
                     .gid(gid)
                     .date(new Date())
                     .cnt(1)
-                    .os(LinkUtil.getOs((HttpServletRequest) request))
+                    .os(os)
                     .build();
             linkOsStatsMapper.linkOsStats(linkOsStatsDO);
 
             // 浏览器统计
+            String browser = LinkUtil.getBrowser((HttpServletRequest) request);
             LinkBrowserStatsDo linkBrowserStatsDo = LinkBrowserStatsDo.builder()
                     .fullShortUrl(fullShortUrl)
                     .gid(gid)
                     .date(new Date())
                     .cnt(1)
-                    .browser(LinkUtil.getBrowser((HttpServletRequest) request))
+                    .browser(browser)
                     .build();
             linkBrowserStatsMapper.linkBrowserStats(linkBrowserStatsDo);
+
+            // 高频IP统计
+            LinkAccessLogsDO linkAccessLogsDO = LinkAccessLogsDO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .user(uv.get())
+                    .browser(browser)
+                    .os(os)
+                    .ip(remoteAddr)
+                    .build();
+            linkAccessLogsMapper.linkAccessLogs(linkAccessLogsDO);
 
         } catch (Throwable ex) {
             log.error("短连接统计时异常!", ex);
