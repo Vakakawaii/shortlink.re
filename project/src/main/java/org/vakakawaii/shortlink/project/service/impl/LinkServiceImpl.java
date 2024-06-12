@@ -74,6 +74,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkBrowserStatsMapper linkBrowserStatsMapper;
     private final LinkAccessLogsMapper linkAccessLogsMapper;
     private final LinkDeviceStatsMapper linkDeviceStatsMapper;
+    private final LinkNetworkStatsMapper linkNetworkStatsMapper;
 
     @Value("${short-link.stats.locate.amap-key}")
     private String statsLocateAmapKey;
@@ -308,6 +309,17 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .device(device)
                     .build();
             linkDeviceStatsMapper.linkDeviceStats(linkDeviceStatsDO);
+
+            // 访问网络统计
+            String network = LinkUtil.getNetwork(((HttpServletRequest) request));
+            LinkNetworkStatsDO linkNetworkStatsDO = LinkNetworkStatsDO.builder()
+                    .network(network)
+                    .cnt(1)
+                    .gid(gid)
+                    .fullShortUrl(fullShortUrl)
+                    .date(new Date())
+                    .build();
+            linkNetworkStatsMapper.linkNetworkStats(linkNetworkStatsDO);
 
         } catch (Throwable ex) {
             log.error("短连接统计时异常!", ex);
