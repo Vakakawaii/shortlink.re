@@ -1,16 +1,19 @@
 package org.vakakawaii.shortlink.project.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.vakakawaii.shortlink.project.dao.entity.LinkAccessStatsDO;
-import org.vakakawaii.shortlink.project.dao.entity.LinkDeviceStatsDO;
-import org.vakakawaii.shortlink.project.dao.entity.LinkLocateStatsDO;
-import org.vakakawaii.shortlink.project.dao.entity.LinkNetworkStatsDO;
+import org.vakakawaii.shortlink.project.dao.entity.*;
 import org.vakakawaii.shortlink.project.dao.mapper.*;
+import org.vakakawaii.shortlink.project.dto.req.LinkStatsAccessRecordReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkStatsReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.*;
 import org.vakakawaii.shortlink.project.service.LinkStatsService;
@@ -230,4 +233,71 @@ public class LinkStatsServiceImpl implements LinkStatsService {
                 .networkStats(networkStats)
                 .build();
     }
+
+
+    @Override
+    public IPage<LinkStatsAccessRecordRespDTO> logLinkAccess(LinkStatsAccessRecordReqDTO linkStatsAccessRecordReqDTO) {
+        // 创建 LambdaQueryWrapper 对象，用于构建查询条件
+        LambdaQueryWrapper<LinkAccessLogsDO> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDO.class)
+                // 添加条件：匹配 fullShortUrl
+                .eq(LinkAccessLogsDO::getFullShortUrl, linkStatsAccessRecordReqDTO.getFullShortUrl())
+                // 添加条件：匹配 gid
+                .eq(LinkAccessLogsDO::getGid, linkStatsAccessRecordReqDTO.getGid())
+                .between(LinkAccessLogsDO::getCreateTime,linkStatsAccessRecordReqDTO.getStartDate(),linkStatsAccessRecordReqDTO.getEndDate())
+                // 添加条件：delFlag 为 0（表示未删除的记录）
+                .eq(LinkAccessLogsDO::getDelFlag, 0)
+                .orderByDesc(LinkAccessLogsDO::getCreateTime);
+
+        // 使用 queryWrapper 进行分页查询
+        IPage<LinkAccessLogsDO> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(linkStatsAccessRecordReqDTO, queryWrapper);
+
+        // 将 LinkAccessLogsDO 对象转换为 LinkStatsAccessRecordRespDTO 对象
+        IPage<LinkStatsAccessRecordRespDTO> result = linkAccessLogsDOIPage.convert(each -> BeanUtil.toBean(each, LinkStatsAccessRecordRespDTO.class));
+
+        // 获取查询结果中的所有用户ID
+        List<String> userAccessLogsList = result.getRecords().stream()
+                .map(LinkStatsAccessRecordRespDTO::getUser)
+                .toList();
+
+        // 根据用户ID列表和请求参数查询用户类型（新访客或老访客）
+        List<Map<String, Object>> uvTypeByUsers = linkAccessLogsMapper.selectUvTypeByUsers(
+                linkStatsAccessRecordReqDTO.getGid(),
+                linkStatsAccessRecordReqDTO.getFullShortUrl(),
+                linkStatsAccessRecordReqDTO.getStartDate(),
+                linkStatsAccessRecordReqDTO.getEndDate(),
+                userAccessLogsList);
+
+        // 为每个结果记录设置用户类型
+        result.getRecords().forEach(each -> {
+            String uvType = uvTypeByUsers.stream()
+                    // 过滤出与当前记录用户ID匹配的记录
+                    .filter(item -> Objects.equals(each.getUser(), item.get("user")))
+                    // 找到第一个匹配的记录
+                    .findFirst()
+                    // 获取用户类型，如果没有匹配则默认为"旧访客"
+                    .map(item -> item.get("user"))
+                    .map(Object::toString)
+                    .orElse("旧访客");
+            // 设置用户类型
+            each.setUvType(uvType);
+        });
+
+        return result;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
