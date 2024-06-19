@@ -238,7 +238,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .gid(gid)
                     .hour(hour)
                     .build();
-            linkAccessStatsMapper.linkStats(linkAccessStatsDO);
+            linkAccessStatsMapper.linkAccessStats(linkAccessStatsDO);
 
             // IP地区统计
             Map<String, Object> locateParamMap = new HashMap<>();
@@ -248,14 +248,19 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             JSONObject locateResultObj = JSON.parseObject(locateResultStr);
             String infoCode = locateResultObj.getString("infocode");
 
+            String realProvince = "";
+            String realCity = "";
+
             if (StrUtil.isNotBlank(infoCode) && StrUtil.equals(infoCode, "10000")) {
                 String province = locateResultObj.getString("province");
                 boolean unknownFlag = StrUtil.equals(province, "[]");
+                realProvince = unknownFlag ? "未知" : province;
+                realCity = unknownFlag ? "未知" : locateResultObj.getString("city");
 
                 LinkLocateStatsDO linkLocateStatsDO = LinkLocateStatsDO.builder()
                         .fullShortUrl(fullShortUrl)
-                        .province(unknownFlag ? "未知" : province)
-                        .city(unknownFlag ? "未知" : locateResultObj.getString("city"))
+                        .province(realProvince)
+                        .city(realCity)
                         .adcode(unknownFlag ? "未知" : locateResultObj.getString("adcode"))
                         .country("中国")
                         .cnt(1)
@@ -279,7 +284,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
             // 浏览器统计
             String browser = LinkUtil.getBrowser((HttpServletRequest) request);
-            LinkBrowserStatsDo linkBrowserStatsDo = LinkBrowserStatsDo.builder()
+            LinkBrowserStatsDO linkBrowserStatsDo = LinkBrowserStatsDO.builder()
                     .fullShortUrl(fullShortUrl)
                     .gid(gid)
                     .date(new Date())
@@ -287,17 +292,6 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .browser(browser)
                     .build();
             linkBrowserStatsMapper.linkBrowserStats(linkBrowserStatsDo);
-
-            // 高频IP统计
-            LinkAccessLogsDO linkAccessLogsDO = LinkAccessLogsDO.builder()
-                    .fullShortUrl(fullShortUrl)
-                    .gid(gid)
-                    .user(uv.get())
-                    .browser(browser)
-                    .os(os)
-                    .ip(remoteAddr)
-                    .build();
-            linkAccessLogsMapper.linkAccessLogs(linkAccessLogsDO);
 
             // 访问设备统计
             String device = LinkUtil.getDevice((HttpServletRequest) request);
@@ -320,6 +314,20 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .date(new Date())
                     .build();
             linkNetworkStatsMapper.linkNetworkStats(linkNetworkStatsDO);
+
+            // 高频IP统计
+            LinkAccessLogsDO linkAccessLogsDO = LinkAccessLogsDO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .user(uv.get())
+                    .browser(browser)
+                    .os(os)
+                    .locate(StrUtil.join("-","中国",realProvince, realCity))
+                    .network(network)
+                    .device(device)
+                    .ip(remoteAddr)
+                    .build();
+            linkAccessLogsMapper.linkAccessLogs(linkAccessLogsDO);
 
         } catch (Throwable ex) {
             log.error("短连接统计时异常!", ex);
