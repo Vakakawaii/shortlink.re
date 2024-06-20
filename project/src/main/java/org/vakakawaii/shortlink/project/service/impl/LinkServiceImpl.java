@@ -75,6 +75,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkAccessLogsMapper linkAccessLogsMapper;
     private final LinkDeviceStatsMapper linkDeviceStatsMapper;
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
+    private final LinkStatsTodayMapper linkStatsTodayMapper;
 
     @Value("${short-link.stats.locate.amap-key}")
     private String statsLocateAmapKey;
@@ -329,6 +330,20 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .build();
             linkAccessLogsMapper.linkAccessLogs(linkAccessLogsDO);
 
+            // Link 单独赋予自增总pv，uv，uip
+            baseMapper.autoIncrement(fullShortUrl,gid,1,uvFirstFlag.get() ? 1 : 0,uipFirstFlag ? 1 : 0);
+
+            // 统计每日pv，uv，uip
+            LinkStatsTodayDO linkStatsTodayDO = LinkStatsTodayDO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .todayPv(1)
+                    .todayUv(uvFirstFlag.get() ? 1 : 0)
+                    .todayUip(uipFirstFlag ? 1 : 0)
+                    .date(new Date())
+                    .build();
+            linkStatsTodayMapper.linkTodayStats(linkStatsTodayDO);
+
         } catch (Throwable ex) {
             log.error("短连接统计时异常!", ex);
         }
@@ -345,6 +360,9 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setFullShortUrl(fullShortUrl);
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
+        linkDO.setTotalPv(0);
+        linkDO.setTotalUv(0);
+        linkDO.setTotalUip(0);
 //        linkDO.setFavicon(getFaviconUrl(linkCreateReqDTO.getOriginUrl()));
 
         LinkGotoDO linkGotoDO = LinkGotoDO.builder()

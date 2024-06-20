@@ -83,6 +83,19 @@ public class LinkDO extends BaseDO {
      */
      private String favicon;
 
+    /**
+     * 历史uv
+     */
+    private Integer totalUv;
 
+    /**
+     * 历史pv
+     */
+    private Integer totalPv;
+
+    /**
+     * 历史uip
+     */
+    private Integer totalUip;
 
 }
