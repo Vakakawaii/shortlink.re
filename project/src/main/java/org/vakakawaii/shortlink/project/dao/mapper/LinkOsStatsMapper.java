@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.vakakawaii.shortlink.project.dao.entity.LinkOsStatsDO;
+import org.vakakawaii.shortlink.project.dto.req.LinkGroupStatsReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkStatsReqDTO;
 
 import java.util.HashMap;
@@ -44,4 +45,22 @@ public interface LinkOsStatsMapper extends BaseMapper<LinkOsStatsDO> {
             "GROUP BY " +
             "    tlos.full_short_url, tl.gid, tlos.os;")
     List<HashMap<String, Object>> listOsStatsByLink(@Param("param")LinkStatsReqDTO linkStatsReqDTO);
+
+    /**
+     * 根据分组获取指定日期内操作系统监控数据
+     */
+    @Select("SELECT " +
+            "    tlos.os, " +
+            "    SUM(tlos.cnt) AS count " +
+            "FROM " +
+            "    t_link tl INNER JOIN " +
+            "    t_link_os_stats tlos ON tl.full_short_url = tlos.full_short_url " +
+            "WHERE " +
+            "    tl.gid = #{param.gid} " +
+            "    AND tl.del_flag = '0' " +
+            "    AND tl.enable_status = '0' " +
+            "    AND tlos.date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    tl.gid, tlos.os;")
+    List<HashMap<String, Object>> listOsStatsByGroup(@Param("param")LinkGroupStatsReqDTO linkGroupStatsReqDTO);
 }

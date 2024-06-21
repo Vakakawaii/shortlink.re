@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LinkStatsLocaleCNRespDTO {
+public class LinkStatsLocateCNRespDTO {
 
     /**
      * 统计
@@ -39,7 +39,7 @@ public class LinkStatsLocaleCNRespDTO {
     /**
      * 地区
      */
-    private String locale;
+    private String locate;
 
     /**
      * 占比

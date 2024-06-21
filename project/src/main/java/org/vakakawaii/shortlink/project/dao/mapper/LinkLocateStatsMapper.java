@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.vakakawaii.shortlink.project.dao.entity.LinkLocateStatsDO;
+import org.vakakawaii.shortlink.project.dto.req.LinkGroupStatsReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkStatsReqDTO;
 
 import java.util.List;
@@ -44,4 +45,22 @@ public interface LinkLocateStatsMapper extends BaseMapper<LinkLocateStatsDO> {
             "GROUP BY " +
             "    tlls.full_short_url, tl.gid, tlls.province;")
     List<LinkLocateStatsDO> listLocateByLink(@Param("param")LinkStatsReqDTO linkStatsReqDTO);
+
+    /**
+     * 根据分组获取指定日期内地区监控数据
+     */
+    @Select("SELECT " +
+            "    tlls.province, " +
+            "    SUM(tlls.cnt) AS cnt " +
+            "FROM " +
+            "    t_link tl INNER JOIN " +
+            "    t_link_locate_stats tlls ON tl.full_short_url = tlls.full_short_url " +
+            "WHERE " +
+            "    tl.gid = #{param.gid} " +
+            "    AND tl.del_flag = '0' " +
+            "    AND tl.enable_status = '0' " +
+            "    AND tlls.date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    tl.gid, tlls.province;")
+    List<LinkLocateStatsDO> listLocateByGroup(@Param("param")LinkGroupStatsReqDTO linkGroupStatsReqDTO);
 }

@@ -35,7 +35,7 @@ public class LinkStatsRespDTO {
     /**
      * 地区访问详情（仅国内）
      */
-    private List<LinkStatsLocaleCNRespDTO> locateCnStats;
+    private List<LinkStatsLocateCNRespDTO> locateCnStats;
 
     /**
      * 小时访问详情

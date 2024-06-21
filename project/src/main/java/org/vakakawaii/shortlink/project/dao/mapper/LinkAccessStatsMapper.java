@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.vakakawaii.shortlink.project.dao.entity.LinkAccessStatsDO;
+import org.vakakawaii.shortlink.project.dto.req.LinkGroupStatsReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkStatsReqDTO;
 
 import java.util.List;
@@ -84,6 +85,62 @@ public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDO> {
             "GROUP BY " +
             "    tlas.full_short_url, tl.gid, tlas.weekday;")
     List<LinkAccessStatsDO> listWeekdayStatsByLink(@Param("param")LinkStatsReqDTO linkStatsReqDTO);
+
+    /**
+     * 根据分组获取指定日期内基础监控数据
+     */
+    @Select("SELECT " +
+            "    tlas.date, " +
+            "    SUM(tlas.pv) AS pv, " +
+            "    SUM(tlas.uv) AS uv, " +
+            "    SUM(tlas.uip) AS uip " +
+            "FROM " +
+            "    t_link tl INNER JOIN " +
+            "    t_link_access_stats tlas ON tl.full_short_url = tlas.full_short_url " +
+            "WHERE " +
+            "    tl.gid = #{param.gid} " +
+            "    AND tl.del_flag = '0' " +
+            "    AND tl.enable_status = '0' " +
+            "    AND tlas.date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    tl.gid, tlas.date;")
+    List<LinkAccessStatsDO> listStatsByGroup(@Param("param")LinkGroupStatsReqDTO linkGroupStatsReqDTO);
+
+    /**
+     * 根据分组获取指定日期内小时基础监控数据
+     */
+    @Select("SELECT " +
+            "    tlas.hour, " +
+            "    SUM(tlas.pv) AS pv " +
+            "FROM " +
+            "    t_link tl INNER JOIN " +
+            "    t_link_access_stats tlas ON tl.full_short_url = tlas.full_short_url " +
+            "WHERE " +
+            "    tl.gid = #{param.gid} " +
+            "    AND tl.del_flag = '0' " +
+            "    AND tl.enable_status = '0' " +
+            "    AND tlas.date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    tl.gid, tlas.hour;")
+    List<LinkAccessStatsDO> listHourStatsByGroup(@Param("param")LinkGroupStatsReqDTO linkGroupStatsReqDTO);
+
+    /**
+     * 根据分组获取指定日期内小时基础监控数据
+     */
+    @Select("SELECT " +
+            "    tlas.weekday, " +
+            "    SUM(tlas.pv) AS pv " +
+            "FROM " +
+            "    t_link tl INNER JOIN " +
+            "    t_link_access_stats tlas ON tl.full_short_url = tlas.full_short_url " +
+            "WHERE " +
+            "    tl.gid = #{param.gid} " +
+            "    AND tl.del_flag = '0' " +
+            "    AND tl.enable_status = '0' " +
+            "    AND tlas.date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    tl.gid, tlas.weekday;")
+    List<LinkAccessStatsDO> listWeekdayStatsByGroup(@Param("param")LinkGroupStatsReqDTO linkGroupStatsReqDTO);
 }
 
 
