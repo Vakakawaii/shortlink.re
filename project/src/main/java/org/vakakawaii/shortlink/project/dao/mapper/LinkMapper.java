@@ -1,11 +1,12 @@
 package org.vakakawaii.shortlink.project.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Delete;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
+import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 
 @Mapper
 public interface LinkMapper extends BaseMapper<LinkDO> {
@@ -23,4 +24,7 @@ public interface LinkMapper extends BaseMapper<LinkDO> {
             @Param("pv") int pv,
             @Param("uv") int uv,
             @Param("uip") int uip);
+
+
+    IPage<LinkDO> pageLink(LinkPageReqDTO linkPageReqDTO);
 }

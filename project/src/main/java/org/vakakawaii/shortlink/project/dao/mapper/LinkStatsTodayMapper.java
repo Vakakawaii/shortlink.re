@@ -17,6 +17,6 @@ public interface LinkStatsTodayMapper extends BaseMapper<LinkStatsTodayDO> {
             "NOW(), NOW(), 0) " +
             "ON DUPLICATE KEY " +
             "UPDATE " +
-            "pv = #{linkAccessStats.pv} + pv, uv = #{linkAccessStats.uv} + uv, uip = #{linkAccessStats.uip} + uip;")
+            "today_pv = #{linkTodayStats.todayPv} + today_pv, today_uv = #{linkTodayStats.todayUv} + today_uv, today_uip = #{linkTodayStats.todayUip} + today_uip;")
     void linkTodayStats(@Param("linkTodayStats")LinkStatsTodayDO linkStatsTodayDO);
 }
