@@ -25,7 +25,7 @@ public class LinkStatsController {
         return Results.success(linkStatsService.oneLinkStats(linkStatsReqDTO));
     }
 
-    @GetMapping("/api/short_link/v1/stats/log")
+    @GetMapping("/api/short_link/v1/stats/one/log")
     public Result<IPage<LinkStatsAccessRecordRespDTO>> logLinkAccess(LinkStatsAccessRecordReqDTO linkStatsAccessRecordReqDTO){
         return Results.success(linkStatsService.logLinkAccess(linkStatsAccessRecordReqDTO));
     }
@@ -41,7 +41,7 @@ public class LinkStatsController {
     /**
      * 访问分组短链接指定时间内访问记录监控数据
      */
-    @GetMapping("/api/short_link/v1/stats/log/group")
+    @GetMapping("/api/short_link/v1/stats/group/log")
     public Result<IPage<LinkStatsAccessRecordRespDTO>> groupLogLinkAccess(LinkGroupStatsAccessRecordReqDTO linkGroupStatsAccessRecordReqDTO) {
         return Results.success(linkStatsService.groupLogLinkAccess(linkGroupStatsAccessRecordReqDTO));
     }

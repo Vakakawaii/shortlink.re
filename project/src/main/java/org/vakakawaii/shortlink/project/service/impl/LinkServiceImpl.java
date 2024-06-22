@@ -363,7 +363,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setTotalPv(0);
         linkDO.setTotalUv(0);
         linkDO.setTotalUip(0);
-//        linkDO.setFavicon(getFaviconUrl(linkCreateReqDTO.getOriginUrl()));
+        linkDO.setFavicon(getFaviconUrl(linkCreateReqDTO.getOriginUrl()));
 
         LinkGotoDO linkGotoDO = LinkGotoDO.builder()
                 .fullShortUrl(fullShortUrl)
