@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.vakakawaii.shortlink.admin.common.convention.result.Result;
 import org.vakakawaii.shortlink.admin.common.convention.result.Results;
 import org.vakakawaii.shortlink.admin.remote.dto.req.*;
-import org.vakakawaii.shortlink.admin.remote.dto.resp.BinPageRespDTO;
-import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
-import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
-import org.vakakawaii.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
+import org.vakakawaii.shortlink.admin.remote.dto.resp.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -90,5 +87,56 @@ public interface LinkRemoteService {
         HttpUtil.post("http://127.0.0.1:8010/api/short_link/v1/bin/delete",
                 JSON.toJSONString(binDeleteReqDTO));
         return Results.success();
+    }
+
+    default Result<LinkStatsRespDTO> oneLinkStats(LinkStatsReqDTO linkStatsReqDTO){
+        Map<String,Object> requestMap = new HashMap<>();
+        requestMap.put("gid",linkStatsReqDTO.getGid());
+        requestMap.put("fullShortUrl",linkStatsReqDTO.getFullShortUrl());
+        requestMap.put("enableStatus", linkStatsReqDTO.getEnableStatus());
+        requestMap.put("startDate", linkStatsReqDTO.getStartDate());
+        requestMap.put("endDate", linkStatsReqDTO.getEndDate());
+        String resultStr = HttpUtil
+                .get("http://127.0.0.1:8010/api/short_link/v1/stats/one",
+                        requestMap);
+        return JSON.parseObject(resultStr, new TypeReference<>() {
+        });
+    }
+
+    default Result<IPage<LinkStatsAccessRecordRespDTO>> logLinkAccess(LinkStatsAccessRecordReqDTO linkStatsAccessRecordReqDTO){
+        Map<String,Object> requestMap = new HashMap<>();
+        requestMap.put("gid",linkStatsAccessRecordReqDTO.getGid());
+        requestMap.put("fullShortUrl",linkStatsAccessRecordReqDTO.getFullShortUrl());
+        requestMap.put("startDate", linkStatsAccessRecordReqDTO.getStartDate());
+        requestMap.put("endDate", linkStatsAccessRecordReqDTO.getEndDate());
+        String resultStr = HttpUtil
+                .get("http://127.0.0.1:8010/api/short_link/v1/stats/one/log",
+                        requestMap);
+        return JSON.parseObject(resultStr, new TypeReference<>() {
+        });
+    }
+
+    default Result<LinkStatsRespDTO> groupLinkStats(LinkGroupStatsReqDTO linkGroupStatsReqDTO){
+        Map<String,Object> requestMap = new HashMap<>();
+        requestMap.put("gid",linkGroupStatsReqDTO.getGid());
+        requestMap.put("startDate", linkGroupStatsReqDTO.getStartDate());
+        requestMap.put("endDate", linkGroupStatsReqDTO.getEndDate());
+        String resultStr = HttpUtil
+                .get("http://127.0.0.1:8010/api/short_link/v1/stats/group",
+                        requestMap);
+        return JSON.parseObject(resultStr, new TypeReference<>() {
+        });
+    }
+
+    default Result<IPage<LinkStatsAccessRecordRespDTO>> groupLogLinkAccess(LinkGroupStatsAccessRecordReqDTO linkGroupStatsAccessRecordReqDTO){
+        Map<String,Object> requestMap = new HashMap<>();
+        requestMap.put("gid",linkGroupStatsAccessRecordReqDTO.getGid());
+        requestMap.put("startDate", linkGroupStatsAccessRecordReqDTO.getStartDate());
+        requestMap.put("endDate", linkGroupStatsAccessRecordReqDTO.getEndDate());
+        String resultStr = HttpUtil
+                .get("http://127.0.0.1:8010/api/short_link/v1/stats/group/log",
+                        requestMap);
+        return JSON.parseObject(resultStr, new TypeReference<>() {
+        });
     }
 }
