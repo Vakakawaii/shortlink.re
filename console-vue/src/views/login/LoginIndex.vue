@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <h1 class="title">SaaS 短 链 接 平 台(马丁)</h1>
+    <h1 class="title">SaaS 短 链 接 平 台</h1>
     <div class="login-box">
       <!-- 登录 -->
       <div class="logon" :class="{ hidden: !isLogin }">
@@ -137,8 +137,8 @@ const loginFormRef1 = ref()
 const loginFormRef2 = ref()
 const router = useRouter()
 const loginForm = reactive({
-  username: 'admin',
-  password: 'admin123456',
+  username: 'tomoyo',
+  password: '00001111',
 })
 const addForm = reactive({
   username: '',
@@ -179,7 +179,7 @@ const loginFormRule = reactive({
   username: [{ required: true, message: '请输入您的真实姓名', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 15, message: '密码长度请在八位以上', trigger: 'blur' }
+    { min: 4, max: 15, message: '密码长度请在四位以上', trigger: 'blur' }
   ],
 })
 // 注册
@@ -283,7 +283,7 @@ const login = (formEl) => {
         }
         ElMessage.success('登录成功！')
         router.push('/home')
-      } else if (res1.data.message === '用户已登录') {
+      } else if (res1.data.message === '用户名已登录') {
         // 如果已经登录了，判断一下浏览器保存的登录信息是不是再次登录的信息，如果是就正常登录
         const cookiesUsername = getUsername()
         if (cookiesUsername === loginForm.username) {
@@ -292,7 +292,7 @@ const login = (formEl) => {
         } else {
           ElMessage.warning('用户已在别处登录，请勿重复登录！')
         }
-      } else if (res1.data.message === '用户不存在') {
+      } else if (res1.data.message === '用户记录不存在') {
         ElMessage.error('请输入正确的账号密码!')
       }
     } else {

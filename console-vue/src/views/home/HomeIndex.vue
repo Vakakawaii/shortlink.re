@@ -10,28 +10,28 @@
               style="text-decoration: none"
               target="_blank"
               href="https://nageoffer.com/shortlink/"
-              >官方文档</a
+              >哇卡哇卡</a
             >
             <a
               class="link-span"
               style="text-decoration: none"
               target="_blank"
               href="https://nageoffer.com/group/"
-              >加沟通群</a
+              >明天明天</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="https://nageoffer.com/shortlink/video/"
-            >🔥视频教程</a
+            >🔥まぼろし</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="http://shortlink.magestack.cn"
-            >演示环境</a
+            >任性自由</a
             >
             <el-dropdown>
               <div class="block">
@@ -115,6 +115,12 @@ const username = ref('')
 onMounted(async () => {
   const actualUsername = getUsername()
   const res = await API.user.queryUserInfo(actualUsername)
+
+  // todo console.log('1')
+  // if(res.data.status === '500'){
+  //   await router.push("/login")
+  // }
+
   // firstName.value = res?.data?.data?.realName?.split('')[0]
   username.value = truncateText(actualUsername, 8)
 })

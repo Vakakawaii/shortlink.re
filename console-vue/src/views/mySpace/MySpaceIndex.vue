@@ -22,8 +22,8 @@
               <!-- 图标 -->
               <el-tooltip show-after="500" class="box-item" effect="dark" :content="'查看图表'" placement="bottom-end">
                 <!-- 传group是为了表示这个请求是查询分组图表数据 -->
-                <el-icon v-if="!(item.shortLinkCount === 0 || item.shortLinkCount === null)" class="edit"
-                  :class="{ zero: item.shortLinkCount === 0 }"
+                <el-icon v-if="!(item.linkCount === 0 || item.linkCount === null)" class="edit"
+                  :class="{ zero: item.linkCount === 0 }"
                   @click="chartsVisible({ describe: item.name, gid: item.gid, group: true })">
                   <Histogram />
                 </el-icon>
@@ -42,7 +42,7 @@
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-              <span class="item-length">{{ item.shortLinkCount ?? 0 }}</span>
+              <span class="item-length">{{ item.linkCount ?? 0 }}</span>
             </div>
           </div>
         </li>
