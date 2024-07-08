@@ -3,7 +3,7 @@
     <el-container>
       <el-header height="54px" style="padding: 0">
         <div class="header">
-          <div @click="toMySpace" class="logo">第17号牌--THE STAR</div>
+          <div @click="toMySpace" class="logo">XVII--T H E  S T A R</div>
           <div style="display: flex; align-items: center">
             <a
               class="link-span"
@@ -24,7 +24,7 @@
                 style="text-decoration: none"
                 target="_blank"
                 href="https://nageoffer.com/shortlink/video/"
-            >🔥まぼろし</a
+            >🔥幻象幻象</a
             >
             <a
                 class="link-span"
