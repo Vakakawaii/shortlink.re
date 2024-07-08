@@ -32,7 +32,8 @@ const router = createRouter({
           name: 'RecycleBin',
           component: () => import('@/views/recycleBin/RecycleBinIndex.vue'),
           meta: { title: '账户设置' }
-        },
+        }
+        ,
         {
           path: 'account',
           name: 'Mine',

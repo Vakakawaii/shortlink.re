@@ -4,7 +4,7 @@
       <el-header height="54px" style="padding: 0">
         <div class="header">
           <div @click="toMySpace" class="logo">XVII--T H E  S T A R</div>
-          <div style="display: flex; align-items: center">
+          <div style="display: flex; align-items: center ;padding-right: 20px">
             <a
               class="link-span"
               style="text-decoration: none"
@@ -17,37 +17,96 @@
               style="text-decoration: none"
               target="_blank"
               href="https://nageoffer.com/group/"
-              >明天明天</a
+              >域名STAR17.CN</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="https://nageoffer.com/shortlink/video/"
-            >🔥幻象幻象</a
+            >🔥备案快点通过</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="http://shortlink.magestack.cn"
-            >任性自由</a
+            >任性自由破碎</a
             >
-            <el-dropdown>
-              <div class="block">
-                <span
-                    class="name-span"
-                    style="text-decoration: none"
-                >{{username}}</span
-                >
+<!--            <el-dropdown>-->
+<!--              <div class="block">-->
+<!--                <span-->
+<!--                    class="name-span"-->
+<!--                    style="text-decoration: none"-->
+<!--                >{{username}}</span-->
+<!--                >-->
+<!--              </div>-->
+<!--              <template #dropdown>-->
+<!--                <el-dropdown-menu>-->
+<!--                  <el-dropdown-item @click="toMine">个人信息</el-dropdown-item>-->
+<!--                  <el-dropdown-item divided @click="logout">退出</el-dropdown-item>-->
+<!--                </el-dropdown-menu>-->
+<!--              </template>-->
+<!--            </el-dropdown>-->
+
+
+            <el-popover
+                placement="bottom-end"
+                trigger="hover"
+                width="480px"
+                v-if="Object.keys(username).length"
+            >
+              <div style="display: flex">
+                <img src="@/assets/logo.png" height="200" width="200" />
+                <el-descriptions title="管理员-CARD" style="width: 225px; margin-left: 25px;" column="1">
+                  <el-descriptions-item label="ID:">{{ username }}</el-descriptions-item>
+                  <el-descriptions-item label="名:">{{ userInfo?.data?.data?.realName  }}</el-descriptions-item>
+                  <el-descriptions-item label="电话:">{{ userInfo?.data?.data?.phone  }}</el-descriptions-item>
+                  <el-descriptions-item label="邮箱:">{{userInfo?.data?.data?.mail  }}</el-descriptions-item>
+                  <el-descriptions-item label="信息変更:">
+                    <el-tooltip effect="dark" content="点击变更信息或登入密码" placement="bottom">
+                    <el-link :underline="false" type="info" @click="toMine">
+                    <strong style="text-decoration: underline;color: gray;">可能&nbsp;</strong>
+                    </el-link>
+                    </el-tooltip>
+                  </el-descriptions-item>
+                </el-descriptions>
               </div>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="toMine">个人信息</el-dropdown-item>
-                  <el-dropdown-item divided @click="logout">退出</el-dropdown-item>
-                </el-dropdown-menu>
+              <el-divider></el-divider>
+<!--              <span>&nbsp;</span>-->
+              <span style="color: gray;">
+                Hi~ 你好，管理员：
+                <el-tooltip effect="dark" content="点击可以退出登录" placement="bottom">
+                  <el-link :underline="false" type="info" @click="logout">
+                    <strong style="text-decoration: underline;">{{ username }}</strong>
+                  </el-link>
+                </el-tooltip>
+                &nbsp;(๑╹ヮ╹๑)ﾉ Studying makes me happy !
+              </span>
+              <template #reference>
+                  <el-button circle style="background-color: transparent; border: 0">
+                    <el-avatar>
+                      <img src="@/assets/logo.png" />
+                    </el-avatar>
+                  </el-button>
               </template>
-            </el-dropdown>
+            </el-popover>
+
+            <el-popover placement="bottom-end" trigger="hover" v-else>
+              <el-card shadow="hover" @click.native="$router.push('/login')">
+                <span style="color: gray;">
+                  Hi~ 你现在是
+                  <strong style="text-decoration: underline;">游客</strong>，啥也干不了，点击登录吧~
+                </span>
+              </el-card>
+            <template #reference>
+              <el-button circle style="background-color: transparent; border: 0">
+                <el-avatar>登录</el-avatar>
+              </el-button>
+            </template>
+            </el-popover>
+
+
           </div>
         </div>
       </el-header>
@@ -85,6 +144,7 @@ import { ref, getCurrentInstance, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { removeKey, removeUsername, getToken, getUsername } from '@/core/auth.js'
 import { ElMessage } from 'element-plus'
+import {cloneDeep} from "lodash";
 const { proxy } = getCurrentInstance()
 const API = proxy.$API
 // 当当前路径和菜单不匹配时，菜单不会被选中
@@ -112,10 +172,18 @@ const toMySpace = () => {
   router.push('/home' + '/space')
 }
 const username = ref('')
+
+const userInfo = ref()
+const userInfoForm = ref() // 修改信息
+// const realname = ref('')
+// const phone = ref('')
+// const mail = ref('')
 onMounted(async () => {
   const actualUsername = getUsername()
   const res = await API.user.queryUserInfo(actualUsername)
 
+  userInfo.value = res
+  userInfoForm.value = cloneDeep(userInfo.value.data?.data)
   // todo console.log('1')
   // if(res.data.status === '500'){
   //   await router.push("/login")
@@ -123,6 +191,9 @@ onMounted(async () => {
 
   // firstName.value = res?.data?.data?.realName?.split('')[0]
   username.value = truncateText(actualUsername, 8)
+  // realname.value = truncateText(res.realName, 8)
+  // phone.value = truncateText(res.phone, 11)
+  // mail.value = truncateText(res.mail, 30)
 })
 const extractColorByName = (name) => {
   var temp = []
@@ -158,7 +229,7 @@ const truncateText = (text, maxLength) => {
 }
 
 .header {
-  background-color: #333333;
+  background-color: rgba(107, 79, 148, 0.86);
   padding: 0 0 0 20px;
   height: 100%;
   display: flex;

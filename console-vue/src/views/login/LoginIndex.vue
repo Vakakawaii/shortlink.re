@@ -100,27 +100,29 @@
         }}</el-button>
       </div>
     </div>
-    <div ref="vantaRef" class="vanta"></div>
+<!--    海洋背景-->
+<!--    <div ref="vantaRef" class="vanta"></div>-->
+    <StarBackground />
   </div>
-  <el-dialog v-model="isWC" title="人机验证" width="40%" :before-close="handleClose">
-    <div class="verification-flex">
-      <span>扫码下方二维码，关注后回复：<strong><span style="color:blue;">link</span></strong>，获取拿个offer-SaaS短链接系统人机验证码</span>
-      <img class="img" src="@/assets/png/公众号二维码.png" alt="">
-      <el-form class="form" :model="verification" :rules="verificationRule" ref="verificationRef">
-        <el-form-item prop="code" label="验证码">
-          <el-input v-model="verification.code" />
-        </el-form-item>
-      </el-form>
-    </div>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="isWC = false">取消</el-button>
-        <el-button type="primary" @click="verificationLogin(verificationRef)">
-          确认
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+<!--  <el-dialog v-model="isWC" title="人机验证" width="40%" :before-close="handleClose">-->
+<!--    <div class="verification-flex">-->
+<!--      <span>扫码下方二维码，关注后回复：<strong><span style="color:blue;">link</span></strong>，获取拿个offer-SaaS短链接系统人机验证码</span>-->
+<!--      <img class="img" src="@/assets/png/公众号二维码.png" alt="">-->
+<!--      <el-form class="form" :model="verification" :rules="verificationRule" ref="verificationRef">-->
+<!--        <el-form-item prop="code" label="验证码">-->
+<!--          <el-input v-model="verification.code" />-->
+<!--        </el-form-item>-->
+<!--      </el-form>-->
+<!--    </div>-->
+<!--    <template #footer>-->
+<!--      <span class="dialog-footer">-->
+<!--        <el-button @click="isWC = false">取消</el-button>-->
+<!--        <el-button type="primary" @click="verificationLogin(verificationRef)">-->
+<!--          确认-->
+<!--        </el-button>-->
+<!--      </span>-->
+<!--    </template>-->
+<!--  </el-dialog>-->
   <!-- </template> -->
 </template>
 
@@ -131,6 +133,8 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as THREE from 'three'
 import WAVES from 'vanta/src/vanta.waves'
+import StarBackground from '@/components/StarBackground.vue';
+
 const { proxy } = getCurrentInstance()
 const API = proxy.$API
 const loginFormRef1 = ref()
@@ -490,7 +494,7 @@ const changeLogin = () => {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: 15%;
+  top: 10%;
   z-index: 999;
   font-size: 40px;
   color: #fff;

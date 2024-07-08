@@ -170,7 +170,7 @@ const formRule = reactive({
   ],
   password: [
     { required: false, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 15, message: '密码长度请在八位以上', trigger: 'blur' }
+    { min: 4, max: 15, message: '密码长度请在四位以上', trigger: 'blur' }
   ],
   realNamee: [{ required: true, message: '请输姓名', trigger: 'blur' }]
 })
