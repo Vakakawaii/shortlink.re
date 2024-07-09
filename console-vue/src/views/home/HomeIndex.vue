@@ -24,7 +24,7 @@
                 style="text-decoration: none"
                 target="_blank"
                 href="https://nageoffer.com/shortlink/video/"
-            >🔥备案快点通过</a
+            >🔥备案工信部搞快</a
             >
             <a
                 class="link-span"
@@ -32,6 +32,20 @@
                 target="_blank"
                 href="http://shortlink.magestack.cn"
             >任性自由破碎</a
+            >
+            <a
+                class="link-span"
+                style="text-decoration: none"
+                target="_blank"
+                href="https://gitee.com/vakakawaii"
+            >Gitee本尊</a
+            >
+            <a
+                class="link-span"
+                style="text-decoration: none"
+                target="_blank"
+                href="https://github.com/Vakakawaii"
+            >GitHub本尊</a
             >
 <!--            <el-dropdown>-->
 <!--              <div class="block">-->
