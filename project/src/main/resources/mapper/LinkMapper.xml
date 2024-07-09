@@ -76,7 +76,7 @@
 <!--                ORDER BY t.total_uip DESC-->
 <!--            </when>-->
 <!--            <otherwise>-->
-                ORDER BY t.create_time DESC
+                ORDER BY t.update_time DESC
 <!--            </otherwise>-->
 <!--        </choose>-->
     </select>
