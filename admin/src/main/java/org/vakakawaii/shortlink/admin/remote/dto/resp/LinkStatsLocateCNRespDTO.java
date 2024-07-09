@@ -17,6 +17,7 @@
 
 package org.vakakawaii.shortlink.admin.remote.dto.resp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,6 +40,7 @@ public class LinkStatsLocateCNRespDTO {
     /**
      * 地区
      */
+    @JsonProperty("locale")
     private String locate;
 
     /**

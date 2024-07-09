@@ -1,5 +1,6 @@
 package org.vakakawaii.shortlink.project.dto.resp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +36,7 @@ public class LinkStatsRespDTO {
     /**
      * 地区访问详情（仅国内）
      */
+    @JsonProperty("localeCnStats")
     private List<LinkStatsLocateCNRespDTO> locateCnStats;
 
     /**

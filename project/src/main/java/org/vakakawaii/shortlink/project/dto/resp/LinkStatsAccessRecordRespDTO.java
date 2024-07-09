@@ -18,6 +18,7 @@
 package org.vakakawaii.shortlink.project.dto.resp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -67,7 +68,8 @@ public class LinkStatsAccessRecordRespDTO {
     /**
      * 地区
      */
-    private String locale;
+    @JsonProperty("locale")
+    private String locate;
 
     /**
      * 用户信息
