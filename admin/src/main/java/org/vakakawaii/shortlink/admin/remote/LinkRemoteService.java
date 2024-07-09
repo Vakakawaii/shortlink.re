@@ -38,6 +38,7 @@ public interface LinkRemoteService {
         requestMap.put("gid",linkPageReqDTO.getGid());
         requestMap.put("current", linkPageReqDTO.getCurrent());
         requestMap.put("size", linkPageReqDTO.getSize());
+        requestMap.put("orderTag",linkPageReqDTO.getOrderTag());
         String resultPageStr = HttpUtil
                 .get("http://127.0.0.1:8010/api/short_link/project/v1/link/page",requestMap);
         return JSON.parseObject(resultPageStr, new TypeReference<>() {
@@ -71,6 +72,7 @@ public interface LinkRemoteService {
         requestMap.put("gids",binPageReqDTO.getGids());
         requestMap.put("current", binPageReqDTO.getCurrent());
         requestMap.put("size", binPageReqDTO.getSize());
+        requestMap.put("orderTag",binPageReqDTO.getOrderTag());
         String resultPageStr = HttpUtil
                 .get("http://127.0.0.1:8010/api/short_link/v1/bin/page",requestMap);
         return JSON.parseObject(resultPageStr, new TypeReference<>() {

@@ -47,12 +47,12 @@ public class BinServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements B
 
     @Override
     public IPage<BinPageRespDTO> pageBin(BinPageReqDTO binPageReqDTO) {
-        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
-                .in(LinkDO::getGid, binPageReqDTO.getGids())
-                .eq(LinkDO::getEnableStatus, 1)
-                .eq(LinkDO::getDelFlag, 0)
-                .orderByDesc(LinkDO::getUpdateTime);
-        IPage<LinkDO> page = baseMapper.selectPage(binPageReqDTO, queryWrapper);
+//        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+//                .in(LinkDO::getGid, binPageReqDTO.getGids())
+//                .eq(LinkDO::getEnableStatus, 1)
+//                .eq(LinkDO::getDelFlag, 0)
+//                .orderByDesc(LinkDO::getUpdateTime);
+        IPage<LinkDO> page = baseMapper.pageBin(binPageReqDTO);
         return page.convert(each -> BeanUtil.toBean(each, BinPageRespDTO.class));
     }
 

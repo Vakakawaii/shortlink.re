@@ -13,4 +13,9 @@ public class BinPageReqDTO extends Page<LinkDO> {
      * 分组标识
      */
     private List<String> gids;
+
+    /**
+     * 排序标识
+     */
+    private String orderTag;
 }

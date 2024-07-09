@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 import org.vakakawaii.shortlink.project.dao.entity.LinkDO;
+import org.vakakawaii.shortlink.project.dto.req.BinPageReqDTO;
 import org.vakakawaii.shortlink.project.dto.req.LinkPageReqDTO;
 
 @Mapper
@@ -27,4 +28,6 @@ public interface LinkMapper extends BaseMapper<LinkDO> {
 
 
     IPage<LinkDO> pageLink(LinkPageReqDTO linkPageReqDTO);
+
+    IPage<LinkDO> pageBin(BinPageReqDTO binPageReqDTO);
 }

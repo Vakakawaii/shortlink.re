@@ -77,6 +77,38 @@ public class LinkDO extends BaseDO {
      */
      private String favicon;
 
+    /**
+     * 历史uv
+     */
+    private Integer totalUv;
+
+    /**
+     * 历史pv
+     */
+    private Integer totalPv;
+
+    /**
+     * 历史uip
+     */
+    private Integer totalUip;
+
+    /**
+     * 今日pv
+     */
+    @TableField(exist = false)
+    private Integer todayPv;
+
+    /**
+     * 今日uv
+     */
+    @TableField(exist = false)
+    private Integer todayUv;
+
+    /**
+     * 今日ip数
+     */
+    @TableField(exist = false)
+    private Integer todayUip;
 
 
 }
