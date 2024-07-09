@@ -457,6 +457,12 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
     @Override
     public IPage<LinkPageRespDTO> pageLink(LinkPageReqDTO linkPageReqDTO) {
+
+        // 不支持回收站排序
+        if(StrUtil.isBlank(linkPageReqDTO.getGid())){
+            throw new  ClientException("不支持回收站排序");
+        }
+
         IPage<LinkDO> page = baseMapper.pageLink(linkPageReqDTO);
         return page.convert(each -> BeanUtil.toBean(each, LinkPageRespDTO.class));
     }
