@@ -16,22 +16,22 @@
               class="link-span"
               style="text-decoration: none"
               target="_blank"
-              href="https://nageoffer.com/group/"
+              href="https://www.bilibili.com/video/BV1gY4y1h7em/"
               >域名STAR17.CN</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
-                href="https://nageoffer.com/shortlink/video/"
+                href="https://www.bilibili.com/video/BV1ps411975C"
             >🔥备案工信部搞快</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
-                href="http://shortlink.magestack.cn"
-            >任性自由破碎</a
+                href="https://www.bilibili.com/video/BV1ue4y1m7xo"
+            >廉价的生活，轻飘飘的梦。</a
             >
             <a
                 class="link-span"
