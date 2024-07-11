@@ -102,7 +102,7 @@
               <div class="table-link-box" :class="{
                 isExpire: scope?.row?.validDateType === 1 && !isExpire(scope?.row?.validDate)
               }">
-                <img :src="getImgUrl(scope.row.favicon)" :key="scope?.row?.id" width="20" height="20" alt="" />
+                <img :src="getImgUrl(scope.row.favicon)" @error="handleError" :key="scope?.row?.id" width="20" height="20" alt="" />
                 <div class="name-date">
                   <el-tooltip show-after="500" :content="scope.row.describe">
                     <span>{{ scope.row.describe }}</span>
@@ -731,6 +731,12 @@ const cancelAddLink = () => {
 const getImgUrl = (url) => {
   return url ?? defaultImg
 }
+
+// 修复前端网络icon无法加载的问题
+const handleError = (event) => {
+  event.target.src = defaultImg;
+};
+
 // 判断链接是否过期
 const isExpire = (validDate) => {
   if (validDate) {

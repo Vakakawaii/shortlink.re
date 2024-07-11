@@ -55,6 +55,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import java.net.URL;
+import cn.hutool.core.util.ObjectUtil;
+import org.vakakawaii.shortlink.project.toolkit.UrlUtil;
+
 import static org.vakakawaii.shortlink.project.common.constant.LinkConstant.AMAP_REMOTE_URL;
 import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.*;
 
@@ -363,7 +367,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setTotalPv(0);
         linkDO.setTotalUv(0);
         linkDO.setTotalUip(0);
-        linkDO.setFavicon(getFaviconUrl(linkCreateReqDTO.getOriginUrl()));
+        linkDO.setFavicon(UrlUtil.getFaviconUrl(linkCreateReqDTO.getOriginUrl()));
 
         LinkGotoDO linkGotoDO = LinkGotoDO.builder()
                 .fullShortUrl(fullShortUrl)
@@ -498,21 +502,4 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         return shortUri;
     }
 
-    private String getFaviconUrl(String url) {
-        try {
-            // 连接到指定的URL并获取HTML内容
-            Document doc = Jsoup.connect(url).get();
-            // 查找HTML中的<link>标签，提取favicon链接
-            Elements links = doc.select("link[rel~=icon]");
-            if (!links.isEmpty()) {
-                // 如果存在带有rel属性值为"icon"的链接，则返回第一个找到的链接
-                return links.get(0).attr("href");
-            } else {
-                // 如果HTML中没有直接指定favicon链接，则尝试在默认位置查找
-                return url + "/favicon.ico";
-            }
-        } catch (Exception ex) {
-            throw new ServiceException("网页图标获取失败");
-        }
-    }
 }
