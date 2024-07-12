@@ -73,16 +73,12 @@
             <el-input
                 v-model="pageParams.input"
                 style="max-width: 800px;width: 400px"
+                clearable
+                @clear="queryPage"
             >
               <template #prepend>
                 <el-button :icon="Search" @click="queryPage"/>
               </template>
-
-              <template #suffix v-if="pageParams.input">
-                <el-icon><Close @click="clearInput" /></el-icon>
-              </template>
-
-
             </el-input>
           </div>
 
@@ -401,7 +397,7 @@ import EditLink from './components/editLink/EditLink.vue'
 import { ElMessage } from 'element-plus'
 import defaultImg from '@/assets/png/短链默认图标.png'
 import QRCode from './components/qrCode/QRCode.vue'
-import {Refresh, Search} from "@element-plus/icons-vue";
+import {Search} from "@element-plus/icons-vue";
 
 // 查看图表的时候传过去展示的，没什么用
 const nums = ref(0)
@@ -609,12 +605,8 @@ const pageParams = reactive({
   current: 1,
   size: 15,
   orderTag: null,
-  input: ""
+  input: ''
 })
-
-const clearInput = () => {
-  pageParams.input=""
-}
 
 watch(
   () => pageParams.orderTag,
