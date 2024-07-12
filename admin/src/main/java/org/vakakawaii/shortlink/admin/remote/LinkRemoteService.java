@@ -40,6 +40,7 @@ public interface LinkRemoteService {
         requestMap.put("current", linkPageReqDTO.getCurrent());
         requestMap.put("size", linkPageReqDTO.getSize());
         requestMap.put("orderTag",linkPageReqDTO.getOrderTag());
+        requestMap.put("input",linkPageReqDTO.getInput());
         String resultPageStr = HttpUtil
                 .get("http://127.0.0.1:8010/api/short_link/project/v1/link/page",requestMap);
         return JSON.parseObject(resultPageStr, new TypeReference<>() {

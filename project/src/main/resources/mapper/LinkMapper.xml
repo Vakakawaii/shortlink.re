@@ -15,6 +15,9 @@
         WHERE t.gid = #{gid}
         AND t.enable_status = 0
         AND t.del_flag = 0
+        <if test="input != null and input != ''">
+            AND t.`describe` like concat('%',#{input},'%')
+        </if>
         <choose>
             <when test="orderTag == 'todayPv'">
                 ORDER BY todayPv DESC

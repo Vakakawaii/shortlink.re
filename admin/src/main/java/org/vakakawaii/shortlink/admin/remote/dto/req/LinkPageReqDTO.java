@@ -16,4 +16,9 @@ public class LinkPageReqDTO extends Page<LinkDO> {
      * 排序标识
      */
     private String orderTag;
+
+    /**
+     * 搜索关键字
+     */
+    private String input;
 }

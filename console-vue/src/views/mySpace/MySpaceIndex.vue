@@ -69,15 +69,23 @@
 <!--            <el-button style="width: 130px; margin-right: 10px" @click="isAddSmallLinks = true">批量创建</el-button>-->
           </div>
           <!--search box-->
-<!--          <div style="margin: 20px">-->
-<!--            <el-input style="width: 240px" placeholder="Name..." v-model="params.name"></el-input>-->
-<!--            <el-button type="primary" style="margin-left: 2px" @click="load">-->
-<!--              <i class="el-icon-search"></i>检索-->
-<!--            </el-button>-->
-<!--            <el-button type="info" style="margin-left: 2px" @click="reset">-->
-<!--              <i class="el-icon-refresh"></i>重置-->
-<!--            </el-button>-->
-<!--          </div>-->
+          <div>
+            <el-input
+                v-model="pageParams.input"
+                style="max-width: 800px;width: 400px"
+            >
+              <template #prepend>
+                <el-button :icon="Search" @click="queryPage"/>
+              </template>
+
+              <template #suffix v-if="pageParams.input">
+                <el-icon><Close @click="clearInput" /></el-icon>
+              </template>
+
+
+            </el-input>
+          </div>
+
 
         </div>
         <!-- 展示回收站信息 -->
@@ -393,6 +401,7 @@ import EditLink from './components/editLink/EditLink.vue'
 import { ElMessage } from 'element-plus'
 import defaultImg from '@/assets/png/短链默认图标.png'
 import QRCode from './components/qrCode/QRCode.vue'
+import {Refresh, Search} from "@element-plus/icons-vue";
 
 // 查看图表的时候传过去展示的，没什么用
 const nums = ref(0)
@@ -599,8 +608,14 @@ const pageParams = reactive({
   gid: null,
   current: 1,
   size: 15,
-  orderTag: null
+  orderTag: null,
+  input: ""
 })
+
+const clearInput = () => {
+  pageParams.input=""
+}
+
 watch(
   () => pageParams.orderTag,
   (nV) => {
