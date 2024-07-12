@@ -24,9 +24,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -49,15 +46,12 @@ import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
 import org.vakakawaii.shortlink.project.service.LinkService;
 import org.vakakawaii.shortlink.project.toolkit.HashUtil;
 import org.vakakawaii.shortlink.project.toolkit.LinkUtil;
+import org.vakakawaii.shortlink.project.toolkit.UrlUtil;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import java.net.URL;
-import cn.hutool.core.util.ObjectUtil;
-import org.vakakawaii.shortlink.project.toolkit.UrlUtil;
 
 import static org.vakakawaii.shortlink.project.common.constant.LinkConstant.AMAP_REMOTE_URL;
 import static org.vakakawaii.shortlink.project.common.constant.RedisKeyConstant.*;
@@ -354,7 +348,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     }
 
 
-    // todo 修改连接的groupID同时，把goto表里的也修改
+
     @Override
     public LinkCreateRespDTO createLink(LinkCreateReqDTO linkCreateReqDTO) {
         String suffix = generateSuffix(linkCreateReqDTO);
@@ -448,13 +442,15 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             baseMapper.update(linkDO, updateWrapper);
         } else {
 //            否则先删除，再增加
-            LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
-                    .eq(LinkDO::getFullShortUrl, linkUpdateReqDTO.getFullShortUrl())
-                    .eq(LinkDO::getGid, hasLinkDO.getGid())
-                    .eq(LinkDO::getDelFlag, 0)
-                    .eq(LinkDO::getEnableStatus, 0);
-            baseMapper.delete(updateWrapper);
-            baseMapper.insert(linkDO);
+            // todo 修改分组未开发...
+            throw new ServiceException("修改分组未开发...");
+//            LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
+//                    .eq(LinkDO::getFullShortUrl, linkUpdateReqDTO.getFullShortUrl())
+//                    .eq(LinkDO::getGid, hasLinkDO.getGid())
+//                    .eq(LinkDO::getDelFlag, 0)
+//                    .eq(LinkDO::getEnableStatus, 0);
+//            baseMapper.delete(updateWrapper);
+//            baseMapper.insert(linkDO);
         }
 
     }

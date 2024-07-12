@@ -38,6 +38,7 @@
 <script setup>
 import { reactive, ref, onMounted, nextTick, watch, onBeforeUnmount, getCurrentInstance } from 'vue'
 import { useStore } from 'vuex'
+import {ElMessage} from "element-plus";
 
 const store = useStore()
 const defaultDomain = store.state.domain?? ' '
@@ -240,6 +241,9 @@ const onSubmit = async (formEl) => {
     if (valid) {
       emits('onSubmit', false)
       const res = await API.smallLinkPage.editSmallLink(formData)
+      if (res.data.message == "修改分组未开发..."){
+        ElMessage.warning("修改分组未开发...")
+      }
       emits('updatePage')
     } else {
     }

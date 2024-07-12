@@ -28,9 +28,10 @@ public interface LinkRemoteService {
     }
 
     default Result<Void> updateLink(LinkUpdateReqDTO linkUpdateReqDTO){
-        HttpUtil.post("http://127.0.0.1:8010/api/short_link/project/v1/link/update",
+        String resultStr = HttpUtil.post("http://127.0.0.1:8010/api/short_link/project/v1/link/update",
                         JSON.toJSONString(linkUpdateReqDTO));
-        return Results.success();
+        return JSON.parseObject(resultStr, new TypeReference<>() {
+        });
     }
 
     default Result<IPage<LinkPageRespDTO>> pageLink(LinkPageReqDTO linkPageReqDTO){
