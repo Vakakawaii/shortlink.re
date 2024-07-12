@@ -3,49 +3,50 @@
     <el-container>
       <el-header height="54px" style="padding: 0">
         <div class="header">
-          <div @click="toMySpace" class="logo">XVII--T H E  S T A R</div>
+<!--          XVII&#45;&#45;T H E  S T A R-->
+          <div @click="toMySpace" class="logo">星星SEVENTEEN</div>
           <div style="display: flex; align-items: center ;padding-right: 20px">
             <a
               class="link-span"
               style="text-decoration: none"
               target="_blank"
               href="https://nageoffer.com/shortlink/"
-              >哇卡哇卡</a
+              >什么是短连接服务？</a
             >
             <a
               class="link-span"
               style="text-decoration: none"
               target="_blank"
-              href="https://www.bilibili.com/video/BV1gY4y1h7em/"
-              >域名STAR17.CN</a
-            >
-            <a
-                class="link-span"
-                style="text-decoration: none"
-                target="_blank"
-                href="https://www.bilibili.com/video/BV1ps411975C"
-            >🔥备案工信部搞快</a
-            >
-            <a
-                class="link-span"
-                style="text-decoration: none"
-                target="_blank"
-                href="https://www.bilibili.com/video/BV1ue4y1m7xo"
-            >廉价的生活，轻飘飘的梦。</a
+              href="https://gitee.com/vakakawaii"
+              >🔥域名STAR17.CN备案中</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="https://gitee.com/vakakawaii"
-            >Gitee本尊</a
+            >管局审核辛苦了</a
+            >
+            <a
+                class="link-span"
+                style="text-decoration: none"
+                target="_blank"
+                href="https://gitee.com/vakakawaii"
+            >此网站为个人学习saas系统。</a
+            >
+            <a
+                class="link-span"
+                style="text-decoration: none"
+                target="_blank"
+                href="https://gitee.com/vakakawaii"
+            >Gitee本人</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="https://github.com/Vakakawaii"
-            >GitHub本尊</a
+            >GitHub本人</a
             >
 <!--            <el-dropdown>-->
 <!--              <div class="block">-->

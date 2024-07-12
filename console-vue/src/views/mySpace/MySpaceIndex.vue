@@ -66,8 +66,19 @@
             <!-- <el-input style="flex: 1; margin-right: 20px" placeholder="请输入http://或https://开头的连接或引用跳转程序"></el-input> -->
             <el-button class="addButton" type="primary" style="width: 130px; margin-right: 10px"
               @click="isAddSmallLink = true">创建短链</el-button>
-            <el-button style="width: 130px; margin-right: 10px" @click="isAddSmallLinks = true">批量创建</el-button>
+<!--            <el-button style="width: 130px; margin-right: 10px" @click="isAddSmallLinks = true">批量创建</el-button>-->
           </div>
+          <!--search box-->
+<!--          <div style="margin: 20px">-->
+<!--            <el-input style="width: 240px" placeholder="Name..." v-model="params.name"></el-input>-->
+<!--            <el-button type="primary" style="margin-left: 2px" @click="load">-->
+<!--              <i class="el-icon-search"></i>检索-->
+<!--            </el-button>-->
+<!--            <el-button type="info" style="margin-left: 2px" @click="reset">-->
+<!--              <i class="el-icon-refresh"></i>重置-->
+<!--            </el-button>-->
+<!--          </div>-->
+
         </div>
         <!-- 展示回收站信息 -->
         <div v-else class="recycle-bin-box">
@@ -347,14 +358,14 @@
           <CreateLink ref="createLink1Ref" :groupInfo="editableTabs" @onSubmit="addLink" @cancel="cancelAddLink"
             :defaultGid="pageParams.gid" :is-single="true"></CreateLink>
         </el-tab-pane>
-        <el-tab-pane>
-          <template #label>
-            <span class="custom-tabs-label">
-              <el-icon>
-                <Connection />
-              </el-icon>
-              <span>随机跳转</span>
-            </span> </template>暂未开发</el-tab-pane>
+<!--        <el-tab-pane>-->
+<!--          <template #label>-->
+<!--            <span class="custom-tabs-label">-->
+<!--              <el-icon>-->
+<!--                <Connection />-->
+<!--              </el-icon>-->
+<!--              <span>随机跳转</span>-->
+<!--            </span> </template>暂未开发</el-tab-pane>-->
       </el-tabs>
     </el-dialog>
     <!-- 修改短链信息弹框 -->
