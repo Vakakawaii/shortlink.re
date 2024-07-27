@@ -149,7 +149,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         // 将用户登录信息以 JSON 格式存储到 Redis 中的 Hash 结构中，并设置过期时间为 8 小时
         stringRedisTemplate.opsForHash()
                 .put("login_"+userLoginReqDTO.getUsername(),uuid,JSON.toJSONString(userDO));
-        stringRedisTemplate.expire("login_"+userLoginReqDTO.getUsername(),8L, TimeUnit.HOURS);
+        stringRedisTemplate.expire("login_"+userLoginReqDTO.getUsername(),7L, TimeUnit.HOURS);
         // 返回用户登录成功后的响应对象，其中包含生成的 token
         return new UserLoginRespDTO(uuid);
     }

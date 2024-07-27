@@ -107,11 +107,11 @@
               </template>
             </el-popover>
 
-            <el-popover placement="bottom-end" trigger="hover" v-else>
+            <el-popover placement="bottom-end" trigger="hover"  width="280px" v-else>
               <el-card shadow="hover" @click.native="$router.push('/login')">
                 <span style="color: gray;">
                   Hi~ 你现在是
-                  <strong style="text-decoration: underline;">游客</strong>，啥也干不了，点击登录吧~
+                  <strong style="text-decoration: underline;">游客</strong>，点击登录吧~
                 </span>
               </el-card>
             <template #reference>
