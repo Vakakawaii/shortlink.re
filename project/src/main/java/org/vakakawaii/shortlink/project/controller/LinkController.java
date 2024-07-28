@@ -1,6 +1,7 @@
 package org.vakakawaii.shortlink.project.controller;
 
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -14,6 +15,7 @@ import org.vakakawaii.shortlink.project.dto.req.LinkUpdateReqDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkCreateRespDTO;
 import org.vakakawaii.shortlink.project.dto.resp.LinkPageRespDTO;
+import org.vakakawaii.shortlink.project.handler.CustomBlockHandler;
 import org.vakakawaii.shortlink.project.service.LinkService;
 
 import java.util.List;
@@ -31,6 +33,11 @@ public class LinkController {
     }
 
     @PostMapping("/api/short_link/project/v1/link/create")
+    @SentinelResource(
+            value = "create_short-link",
+            blockHandler = "createShortLinkBlockHandlerMethod",
+            blockHandlerClass = CustomBlockHandler.class
+    )
     public Result<LinkCreateRespDTO> createLink(@RequestBody LinkCreateReqDTO linkCreateReqDTO){
         LinkCreateRespDTO link = linkService.createLink(linkCreateReqDTO);
         return Results.success(link);
