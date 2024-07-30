@@ -276,7 +276,7 @@ public class LinkStatsServiceImpl implements LinkStatsService {
                     // 找到第一个匹配的记录
                     .findFirst()
                     // 获取用户类型，如果没有匹配则默认为"旧访客"
-                    .map(item -> item.get("user"))
+                    .map(item -> item.get("uvType"))
                     .map(Object::toString)
                     .orElse("旧访客");
             // 设置用户类型
