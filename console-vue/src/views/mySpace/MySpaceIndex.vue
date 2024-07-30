@@ -618,7 +618,7 @@ const totalNums = ref(0)
 // 数据变化后更新当前页面
 const queryPage = async () => {
   pageParams.gid = editableTabs.value?.[selectedIndex.value]?.gid
-  nums.value = editableTabs.value?.[selectedIndex.value]?.shortLinkCount || 0
+  nums.value = editableTabs.value?.[selectedIndex.value]?.linkCount || 0
   const res = await API.smallLinkPage.queryPage(pageParams)
   if (res?.data.success) {
     tableData.value = res.data?.data?.records
