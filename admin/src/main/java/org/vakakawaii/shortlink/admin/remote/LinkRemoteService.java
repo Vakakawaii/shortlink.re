@@ -113,6 +113,8 @@ public interface LinkRemoteService {
         requestMap.put("fullShortUrl",linkStatsAccessRecordReqDTO.getFullShortUrl());
         requestMap.put("startDate", linkStatsAccessRecordReqDTO.getStartDate());
         requestMap.put("endDate", linkStatsAccessRecordReqDTO.getEndDate());
+        requestMap.put("current", linkStatsAccessRecordReqDTO.getCurrent());
+        requestMap.put("size", linkStatsAccessRecordReqDTO.getSize());
         String resultStr = HttpUtil
                 .get("http://127.0.0.1:8010/api/short_link/v1/stats/one/log",
                         requestMap);
@@ -137,6 +139,8 @@ public interface LinkRemoteService {
         requestMap.put("gid",linkGroupStatsAccessRecordReqDTO.getGid());
         requestMap.put("startDate", linkGroupStatsAccessRecordReqDTO.getStartDate());
         requestMap.put("endDate", linkGroupStatsAccessRecordReqDTO.getEndDate());
+        requestMap.put("current", linkGroupStatsAccessRecordReqDTO.getCurrent());
+        requestMap.put("size", linkGroupStatsAccessRecordReqDTO.getSize());
         String resultStr = HttpUtil
                 .get("http://127.0.0.1:8010/api/short_link/v1/stats/group/log",
                         requestMap);
