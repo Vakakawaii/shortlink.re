@@ -85,9 +85,9 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
 
     public void actualSaveShortLinkStats(LinkStatsRecordDTO statsRecord) {
         String fullShortUrl = statsRecord.getFullShortUrl();
-        RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(LOCK_GID_UPDATE_KEY, fullShortUrl));
-        RLock rLock = readWriteLock.readLock();
-        rLock.lock();
+//        RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(LOCK_GID_UPDATE_KEY, fullShortUrl));
+//        RLock rLock = readWriteLock.readLock();
+//        rLock.lock();
         try {
             LambdaQueryWrapper<LinkGotoDO> queryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
                     .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
@@ -217,7 +217,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
         } catch (Throwable ex) {
             log.error("短链接访问量统计异常", ex);
         } finally {
-            rLock.unlock();
+//            rLock.unlock();
         }
     }
 }
