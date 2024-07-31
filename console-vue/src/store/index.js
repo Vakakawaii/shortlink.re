@@ -6,8 +6,8 @@ const store = createStore({
     return {
       // domain: 'nurl.ink'
       // domain: 's.nageoffer.com'
-      // domain: 'v.star17.cn'
-      domain: '47.100.32.85'
+      domain: 'v.star17.cn'
+      // domain: '47.100.32.85'
     }
   }
 })

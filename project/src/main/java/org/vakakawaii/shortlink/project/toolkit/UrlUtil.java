@@ -16,6 +16,7 @@ public class UrlUtil {
         String faviconHref = "";
         String protocol = "";
         String host = "";
+        int timeout = 2333; // 超时时间，单位为毫秒（例如5秒）
         try {
             String linkTrim = StrUtil.trimToEmpty(link);
             // 假设输入的参数不携带协议，则拼接协议
@@ -27,7 +28,9 @@ public class UrlUtil {
             //忽略SSL证书
             SslUtil.ignoreSsl();
             // 发请求
-            Document document = Jsoup.connect(urlJoinHttps).get();
+            Document document = Jsoup.connect(urlJoinHttps)
+                    .timeout(timeout)
+                    .get();
             // 筛选包含favicon图标的link标签
             Elements title = document.select("link[type=image/x-icon]");
             title = ObjectUtil.isEmpty(title) ? document.select("link[rel$=icon]") : title;
