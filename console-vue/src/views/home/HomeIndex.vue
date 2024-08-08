@@ -4,49 +4,49 @@
       <el-header height="54px" style="padding: 0">
         <div class="header">
           <!--          XVII&#45;&#45;T H E  S T A R-->
-          <div @click="toMySpace" class="logo">XVII--T H E S T A R</div>
+          <div @click="toMySpace" class="logo">TikTok ☆ STAR17</div>
           <div style="display: flex; align-items: center ;padding-right: 20px">
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="https://space.bilibili.com/29346798"
-            >哇卡哇卡</a
+            >哇卡哇卡♪</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
-                href="https://www.bilibili.com/video/BV1gY4y1h7em/"
-            >🔥域名STAR17.CN</a
+                href="https://www.bilibili.com/video/BV1Nt411x7k8"
+            >星星寓意宁静与信心</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
-                href="https://www.bilibili.com/video/BV1ps411975C"
-            >17号牌-星星</a
+                href="https://www.bilibili.com/video/BV1tt411C7x2"
+            >一颗星指引着七课小星</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
-                href="https://www.bilibili.com/video/BV1ue4y1m7xo"
-            >廉价的生活，轻飘飘的梦。</a
+                href="https://www.bilibili.com/video/BV1ib411c7zy"
+            >雨后终见彩虹🌈</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="https://gitee.com/vakakawaii"
-            >Gitee本尊</a
+            >Gitee</a
             >
             <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="https://github.com/Vakakawaii"
-            >GitHub本尊</a
+            >GitHub</a
             >
             <!--            <el-dropdown>-->
             <!--              <div class="block">-->
@@ -245,7 +245,7 @@ const truncateText = (text, maxLength) => {
 }
 
 .header {
-  background-color: rgba(107, 79, 148, 0.86);
+  background-color: rgba(72, 88, 171, 0.57);
   padding: 0 0 0 20px;
   height: 100%;
   display: flex;
