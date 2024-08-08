@@ -142,7 +142,7 @@ const loginFormRef2 = ref()
 const router = useRouter()
 const loginForm = reactive({
   username: 'tomoyo',
-  password: '00001111',
+  password: '1234',
 })
 const addForm = reactive({
   username: '',
@@ -165,7 +165,7 @@ const addFormRule = reactive({
   username: [{ required: true, message: '请输入您的真实姓名', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 15, message: '密码长度请在八位以上', trigger: 'blur' }
+    { min: 4, max: 15, message: '密码长度请在四位以上', trigger: 'blur' }
   ],
   mail: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
