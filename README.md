@@ -19,7 +19,8 @@
 ![image](https://github.com/user-attachments/assets/2b58a453-759c-4793-82fa-e0f68042d6fd)
 
 访客记录统计：
-![IMG_20240809_204038](https://github.com/user-attachments/assets/9f3c3b7f-0d0f-4fcf-a8a5-d7e3d733c2bf)
+![IMG_20240809_205049](https://github.com/user-attachments/assets/03342b93-5f3c-4eaa-a1ee-d6b72106aea2)
+
 
 hei！管理员vakaです！
 ![image](https://github.com/user-attachments/assets/89c9b6fc-b50d-4966-9574-1d139abb17cf)
