@@ -296,7 +296,7 @@ const getUrl2 = (img) => {
   if (img) {
     img = img.toLowerCase()
   }
-  if (img?.includes('andriod')) {
+  if (img?.includes('android')) {
     return Andriod
   } else if (img?.includes('ios')) {
     return iOS

@@ -90,10 +90,10 @@ public class LinkUtil {
         String userAgent = request.getHeader("User-Agent");
         if (userAgent.toLowerCase().contains("edg")) {
             return "Microsoft Edge";
-        } else if (userAgent.toLowerCase().contains("safari")) {
-            return "Apple Safari";
         } else if (userAgent.toLowerCase().contains("chrome")) {
             return "Google Chrome";
+        } else if (userAgent.toLowerCase().contains("safari")) {
+            return "Apple Safari";
         } else if (userAgent.toLowerCase().contains("firefox")) {
             return "Mozilla Firefox";
         } else if (userAgent.toLowerCase().contains("opera")) {
