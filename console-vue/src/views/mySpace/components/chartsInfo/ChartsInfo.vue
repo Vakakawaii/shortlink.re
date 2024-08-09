@@ -119,7 +119,7 @@
           <TitleContent class="chart-item" title="一周分布" style="width: 390px">
             <template #content>
               <BarChart style="height: 100%; width: 100%" :chartData="{
-                xAxis: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+                xAxis: [ '周一', '周二', '周三', '周四', '周五', '周六','周日'],
                 value: props.info?.weekdayStats || new Array(7).fill(0)
               }"></BarChart>
             </template>

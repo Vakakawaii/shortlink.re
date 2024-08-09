@@ -102,7 +102,8 @@
     </div>
 <!--    海洋背景-->
 <!--    <div ref="vantaRef" class="vanta"></div>-->
-    <StarBackground />
+<!--    <StarBackground />-->
+      <SnowBackground/>
   </div>
 <!--  <el-dialog v-model="isWC" title="人机验证" width="40%" :before-close="handleClose">-->
 <!--    <div class="verification-flex">-->
@@ -131,9 +132,10 @@ import { setToken, setUsername, getUsername } from '@/core/auth.js'
 import { ref, reactive, onMounted, onBeforeUnmount, watch, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import * as THREE from 'three'
-import WAVES from 'vanta/src/vanta.waves'
-import StarBackground from '@/components/StarBackground.vue';
+// import * as THREE from 'three'
+// import WAVES from 'vanta/src/vanta.waves'
+// import StarBackground from '@/components/StarBackground.vue';
+import SnowBackground from '@/components/SnowBackground.vue'
 
 const { proxy } = getCurrentInstance()
 const API = proxy.$API
@@ -222,48 +224,48 @@ const addUser = (formEl) => {
 
 }
 // 公众号验证码
-const isWC = ref(false)
-const verificationRef = ref()
-const verification = reactive({
-  code: ''
-})
-const verificationRule = reactive({
-  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
-})
-const verificationLogin = (formEl) => {
-  if (!formEl) return
-  formEl.validate(async (valid) => {
-    if (valid) {
-      const tempPassword = loginForm.password
-      loginForm.password = verification.code
-      const res1 = await API.user.login(loginForm)
-      if (res1.data.code === '0') {
-        const token = res1?.data?.data?.token
-        // 将username和token保存到cookies中和localStorage中
-        if (token) {
-          setToken(token)
-          setUsername(loginForm.username)
-          localStorage.setItem('token', token)
-          localStorage.setItem('username', loginForm.username)
-        }
-        ElMessage.success('登录成功！')
-        router.push('/home')
-      } else if (res1.data.message === '用户已登录') {
-        // 如果已经登录了，判断一下浏览器保存的登录信息是不是再次登录的信息，如果是就正常登录
-        const cookiesUsername = getUsername()
-        if (cookiesUsername === loginForm.username) {
-          ElMessage.success('登录成功！')
-          router.push('/home')
-        } else {
-          ElMessage.warning('用户已在别处登录，请勿重复登录！')
-        }
-      } else {
-        ElMessage.error('请输入正确的验证码!')
-      }
-      loginForm.password = tempPassword
-    }
-  })
-}
+// const isWC = ref(false)
+// const verificationRef = ref()
+// const verification = reactive({
+//   code: ''
+// })
+// const verificationRule = reactive({
+//   code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+// })
+// const verificationLogin = (formEl) => {
+//   if (!formEl) return
+//   formEl.validate(async (valid) => {
+//     if (valid) {
+//       const tempPassword = loginForm.password
+//       loginForm.password = verification.code
+//       const res1 = await API.user.login(loginForm)
+//       if (res1.data.code === '0') {
+//         const token = res1?.data?.data?.token
+//         // 将username和token保存到cookies中和localStorage中
+//         if (token) {
+//           setToken(token)
+//           setUsername(loginForm.username)
+//           localStorage.setItem('token', token)
+//           localStorage.setItem('username', loginForm.username)
+//         }
+//         ElMessage.success('登录成功！')
+//         router.push('/home')
+//       } else if (res1.data.message === '用户已登录') {
+//         // 如果已经登录了，判断一下浏览器保存的登录信息是不是再次登录的信息，如果是就正常登录
+//         const cookiesUsername = getUsername()
+//         if (cookiesUsername === loginForm.username) {
+//           ElMessage.success('登录成功！')
+//           router.push('/home')
+//         } else {
+//           ElMessage.warning('用户已在别处登录，请勿重复登录！')
+//         }
+//       } else {
+//         ElMessage.error('请输入正确的验证码!')
+//       }
+//       loginForm.password = tempPassword
+//     }
+//   })
+// }
 // 登录
 const login = (formEl) => {
   if (!formEl) return
@@ -310,27 +312,27 @@ const login = (formEl) => {
 const loading = ref(false)
 // 是否记住密码
 const checked = ref(true)
-const vantaRef = ref()
+// const vantaRef = ref()
 // 动态背景
-let vantaEffect = null
-onMounted(() => {
-  vantaEffect = WAVES({
-    el: vantaRef.value,
-    THREE: THREE,
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.0,
-    minWidth: 200.0,
-    scale: 1.0,
-    scaleMobile: 1.0
-  })
-})
-onBeforeUnmount(() => {
-  if (vantaEffect) {
-    vantaEffect.destroy()
-  }
-})
+// let vantaEffect = null
+// onMounted(() => {
+//   vantaEffect = WAVES({
+//     el: vantaRef.value,
+//     THREE: THREE,
+//     mouseControls: true,
+//     touchControls: true,
+//     gyroControls: false,
+//     minHeight: 200.0,
+//     minWidth: 200.0,
+//     scale: 1.0,
+//     scaleMobile: 1.0
+//   })
+// })
+// onBeforeUnmount(() => {
+//   if (vantaEffect) {
+//     vantaEffect.destroy()
+//   }
+// })
 // 展示登录还是展示注册
 const isLogin = ref(true)
 const moveRef = ref() // 左右移动的切换按钮模块
@@ -351,7 +353,7 @@ const changeLogin = () => {
 
 <style lang="less" scoped>
 .login-box {
-  border: 2px solid #0984e3;
+  border: 2px solid rgba(232, 232, 232, 0.3);
   overflow: hidden;
   display: flex;
   justify-content: space-between;
@@ -432,6 +434,13 @@ const changeLogin = () => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+
+  background-image: url('@/assets/Animal Crossing New Horizons Create A Star Island.jpg');
+  background-size: cover;
+
+  opacity: 0.9;
+  //position: fixed;
+  background-repeat: no-repeat;
 }
 
 .vanta {
@@ -480,13 +489,13 @@ const changeLogin = () => {
   width: 40%;
   transition-duration: 0.5s;
   align-items: center;
-  background: #06beb6;
+  background: #02e8dd;
   /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #0984e3, #0984e3);
+  background: -webkit-linear-gradient(to right, rgb(64, 64, 64), rgb(61, 49, 136));
   /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(to right,
-      #1a8fd5,
-      #0984e3);
+  rgb(135, 200, 160),
+  rgb(135, 200, 160));
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 

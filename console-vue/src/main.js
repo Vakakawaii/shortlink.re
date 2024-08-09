@@ -11,7 +11,8 @@ import API from '@/api/index'
 import store from './store'
 // import ViewUIPlus from 'view-ui-plus'
 // import 'view-ui-plus/dist/styles/viewuiplus.css'
-
+import Particles from "@tsparticles/vue3";
+import { loadSlim } from "@tsparticles/slim";
 
 const app = createApp(App)
 
@@ -22,6 +23,12 @@ app.use(router)
 app.use(ElementPlus)
 app.use(store)
 // app.use(ViewUIPlus)
+app.use(Particles, {
+      init: async engine => {
+        await loadSlim(engine);
+      },
+    })
+
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
