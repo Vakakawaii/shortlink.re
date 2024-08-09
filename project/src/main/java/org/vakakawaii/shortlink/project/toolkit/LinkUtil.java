@@ -33,14 +33,14 @@ public class LinkUtil {
             return "Windows";
         } else if (userAgent.toLowerCase().contains("mac")) {
             return "Mac OS";
-        } else if (userAgent.toLowerCase().contains("linux")) {
-            return "Linux";
-        } else if (userAgent.toLowerCase().contains("unix")) {
-            return "Unix";
         } else if (userAgent.toLowerCase().contains("android")) {
             return "Android";
         } else if (userAgent.toLowerCase().contains("iphone")) {
             return "iOS";
+        } else if (userAgent.toLowerCase().contains("linux")) {
+            return "Linux";
+        } else if (userAgent.toLowerCase().contains("unix")) {
+            return "Unix";
         } else {
             return "Unknown";
         }
@@ -90,12 +90,12 @@ public class LinkUtil {
         String userAgent = request.getHeader("User-Agent");
         if (userAgent.toLowerCase().contains("edg")) {
             return "Microsoft Edge";
+        } else if (userAgent.toLowerCase().contains("safari")) {
+            return "Apple Safari";
         } else if (userAgent.toLowerCase().contains("chrome")) {
             return "Google Chrome";
         } else if (userAgent.toLowerCase().contains("firefox")) {
             return "Mozilla Firefox";
-        } else if (userAgent.toLowerCase().contains("safari")) {
-            return "Apple Safari";
         } else if (userAgent.toLowerCase().contains("opera")) {
             return "Opera";
         } else if (userAgent.toLowerCase().contains("msie") || userAgent.toLowerCase().contains("trident")) {
@@ -127,8 +127,17 @@ public class LinkUtil {
      */
     public static String getNetwork(HttpServletRequest request) {
         String realIp = getRealIp(request);
-        // 这里简单判断IP地址范围，您可能需要更复杂的逻辑
-        // 例如，通过调用IP地址库或调用第三方服务来判断网络类型
-        return realIp.startsWith("192.168.") || realIp.startsWith("10.") ? "WIFI" : "Mobile";
+        String userAgent = request.getHeader("User-Agent");
+
+        // 进一步判断网络类型
+        if (realIp.startsWith("192.168.") || realIp.startsWith("10.")) {
+            // 检查User-Agent或其他信息
+            if (userAgent != null && userAgent.contains("Mobile")) {
+                return "Mobile";
+            }
+            return "WIFI";
+        }
+
+        return "WIFI";
     }
 }
