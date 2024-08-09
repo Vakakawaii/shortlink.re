@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <h1 class="title">TikTok 短 链 分 享 平 台</h1>
+    <h1 class="title" style="color: white; text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);" >TikTok 短 链 分 享 平 台</h1>
     <div class="login-box">
       <!-- 登录 -->
       <div class="logon" :class="{ hidden: !isLogin }">
@@ -100,7 +100,14 @@
         }}</el-button>
       </div>
     </div>
-<!--    海洋背景-->
+    <div style="width: 100%;position: fixed;  padding: 10px;text-align: center;bottom: 0;">
+      <p>
+        <a href="https://beian.miit.gov.cn" target="_blank" style="color: white; text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);">
+          鄂ICP备2024066832号-1</a>
+      </p>
+    </div>
+
+    <!--    海洋背景-->
 <!--    <div ref="vantaRef" class="vanta"></div>-->
 <!--    <StarBackground />-->
       <SnowBackground/>
